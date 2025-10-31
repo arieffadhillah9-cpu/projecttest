@@ -1,5 +1,12 @@
- <div class="float-right d-none d-sm-inline">
-          Anything you want
+<div class="container d-flex justify-content-between align-items-center">
+        <a href="#" class="navbar-brand m-0"> 
+            <span class="brand-text font-weight-light text-white">**MULTI**<span class="text-danger">PLEX</span></span>
+        </a>
+        
+        <div class="d-flex">
+            <a href="#" class="text-white mr-3 text-sm">MAIN</a>
+            <a href="#" class="text-white mr-3 text-sm">MOVIES</a>
+            <a href="#" class="text-white mr-3 text-sm">NEWS</a>
+            <a href="#" class="text-white text-sm">CONTACTS</a>
         </div>
-        <!-- Default to the left -->
-        <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    </div>
