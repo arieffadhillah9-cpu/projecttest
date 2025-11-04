@@ -8,7 +8,7 @@
 @section('content')
 <div class="container-fluid p-0">
         <div class="p-5 text-white" 
-        style="background-image: url({{ asset('adminlte/assets/dist/img/cc.png') }}); 
+        style="background-image: url({{ asset('adminlte/assets/dist/img/') }}); 
         background-size: cover; 
         background-position: center; 
         position: top; 
