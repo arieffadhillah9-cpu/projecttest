@@ -4,3 +4,5 @@
   <link rel="stylesheet" href="{{ asset('adminlte/assets/plugins/fontawesome-free/css/all.min.css') }}">
   <!-- Theme style -->
    <link rel="stylesheet" href="{{ asset('adminlte/assets/dist/css/adminlte.min.css') }}">
+   
+   <link rel="stylesheet" href="{{ asset('adminlte/assets/dist/css/dashboard.css') }}">
