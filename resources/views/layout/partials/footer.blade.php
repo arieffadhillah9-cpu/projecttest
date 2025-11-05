@@ -1,6 +1,6 @@
 <div class="container d-flex justify-content-between align-items-center">
         <a href="#" class="navbar-brand m-0"> 
-            <span class="brand-text font-weight-light text-white">**MULTI**<span class="text-danger">PLEX</span></span>
+            <span class="brand-text font-weight-bold text-white">Seatly<span class="text-danger"></span></span>
         </a>
         
         <div class="d-flex">
