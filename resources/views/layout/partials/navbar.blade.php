@@ -1,7 +1,7 @@
 <nav class="main-header navbar navbar-expand-md navbar-dark navbar-dark fixed-top" style="background-color: #000000; border-bottom: none;">
     <div class="container">
         <a href="#" class="navbar-brand">
-            <span class="brand-text font-weight-light text-white">**MULTI**<span class="text-danger">PLEX</span></span>
+            <span class="brand-text font-weight-bold text-white">Seatly<span class="text-danger"></span></span>
         </a>
 
         <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
