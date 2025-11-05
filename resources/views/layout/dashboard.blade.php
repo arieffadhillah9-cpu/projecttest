@@ -8,7 +8,7 @@
 @section('content')
 <div class="container-fluid p-0">
         <div class="p-5 text-white" 
-        style="background-image: url({{ asset('adminlte/assets/dist/img/') }}); 
+        style="background-image: url({{ asset('adminlte/dist/img/') }}); 
         background-size: cover; 
         background-position: center; 
         position: top; 
@@ -30,7 +30,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3">
-                        <label class="text-white">CHOSSE DATE</label>
+                        <label class="text-white">CHOOSE DATE</label>
                         <div class="d-flex text-white">
                             <a href="#" class="text-white mr-3">MON <span class="badge bg-danger">30</span></a>
                             <a href="#" class="text-white mr-3">TUE</a>
@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="col-md-5">
-                        <label class="text-white">CHOSSE TIME</label>
+                        <label class="text-white">CHOOSE TIME</label>
                         <div class="d-flex text-white">
                             <a href="#" class="btn btn-outline-light btn-sm mr-2">15:00</a>
                             <a href="#" class="btn btn-outline-light btn-sm mr-2">17:00</a>
