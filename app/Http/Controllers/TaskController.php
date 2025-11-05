@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+
 use Illuminate\Http\Request;
+
 
 class TaskController extends Controller
 {
@@ -11,7 +14,9 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        
+         $tasks = Task::orderBy('created_at', 'desc')->get();
+          return view('tasks.index', compact('tasks')); // Perintah untuk menampilkan form HTML
     }
 
     /**
@@ -19,7 +24,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+        
         return view('tasks.create'); // Perintah untuk menampilkan form HTML
     }
 
