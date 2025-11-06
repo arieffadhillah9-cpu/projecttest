@@ -2,21 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
-
 use Illuminate\Http\Request;
 
-
-class TaskController extends Controller
+class StudioController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        
-         $tasks = Task::orderBy('created_at', 'desc')->get();
-          return view('tasks.index', compact('tasks')); // Perintah untuk menampilkan form HTML
+        //
     }
 
     /**
@@ -24,8 +19,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        
-        return view('tasks.create'); // Perintah untuk menampilkan form HTML
+        //
     }
 
     /**
@@ -33,12 +27,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-         $request->validate(['title' => 'required|max:255']);
-
-        Task::create(['title' => $request->input('title')]);
-        
-        // Redirect berhasil
-        return redirect()->route('tasks.index')->with('success', 'Tugas berhasil ditambahkan!');
+        //
     }
 
     /**
