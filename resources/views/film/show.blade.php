@@ -1,68 +1,77 @@
+
 @extends('layout.app')
 
 @section('content')
 
-<div class="jumbotron jumbotron-fluid text-white" style="background-color: #1a1a1a; padding: 100px 0; margin-bottom: 0;">
+{{-- Bagian Jumbotron Hitam (Opsional, untuk konsistensi header) --}}
+<div class="jumbotron jumbotron-fluid text-white" style="background-color: #1a1a1a; padding: 50px 0; margin-bottom: 0;">
     <div class="container text-center">
-        <h1 class="display-4 font-weight-bold">Daftar Film Yang Sedang Tayang</h1>
-        <p class="lead">Temukan Jadwal dan Detail Film Terbaru Hari Ini</p>
+        <h1 class="display-4 font-weight-bold">Detail Film: {{ $film->judul }}</h1>
     </div>
 </div>
-<div class="bg-dark py-3">
+
+{{-- Wrapper Konten Utama (Warna Hitam) --}}
+<div class="bg-dark py-5 text-white">
     <div class="container">
-        <nav class="nav nav-pills nav-fill">
-            <a class="nav-item nav-link active" href="#">HARI INI</a>
-            <a class="nav-item nav-link text-white-50" href="#">BESOK</a>
-            <a class="nav-item nav-link text-white-50" href="#">SEMUA FILM</a>
-            <a href="{{ route('film.create') }}" class="btn btn-sm btn-success ml-auto">
-                <i class="fas fa-plus"></i> Tambah Film
-            </a>
-        </nav>
-    </div>
-</div>
-<div class="container py-5">
-
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
-
-    <div class="row">
-        @foreach ($films as $film)
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    {{-- PENTING: Menggunakan asset() untuk gambar lokal --}}
-                    <img src="{{ asset($film->poster_path) }}" class="card-img-top" alt="{{ $film->judul }}" style="height: 350px; object-fit: cover;"> 
-                    
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $film->judul }}</h5>
-                        <p class="card-text small text-muted">Durasi: {{ $film->durasi_menit }} Menit</p>
-                        <p class="card-text small text-muted">Rilis: {{ $film->tanggal_rilis }}</p>
-
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <a href="{{ route('film.show', $film->id) }}" class="btn btn-sm btn-info">Detail</a>
-                            
-                            <form action="{{ route('film.destroy', $film->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus film {{ $film->judul }}?')">Hapus</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+        
+        <div class="card bg-secondary text-white shadow-lg"> {{-- Menggunakan card gelap untuk kontras --}}
+            
+            <div class="card-header border-0">
+                {{-- Tombol Kembali --}}
+                <a href="{{ route('film.index') }}" class="btn btn-info">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                </a>
             </div>
-        @endforeach
-    </div>
 
-    @if ($films->isEmpty())
-        <div class="alert alert-warning text-center">
-            Belum ada data film yang tersedia.
+            <div class="card-body">
+                
+                {{-- Detail Film dalam Tabel --}}
+                <table class="table table-bordered table-dark table-striped"> {{-- Tambahkan table-dark --}}
+                    <tbody>
+                        <tr>
+                            <th style="width: 200px">Judul Film</th>
+                            <td>{{ $film->judul }}</td>
+                        </tr>
+                        <tr>
+                            <th>Durasi</th>
+                            <td>{{ $film->durasi_menit }} Menit</td>
+                        </tr>
+                        <tr>
+                            <th>Sutradara</th>
+                            <td>{{ $film->sutradara ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Genre</th>
+                            <td>{{ $film->genre }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Rilis</th>
+                            <td>{{ \Carbon\Carbon::parse($film->tanggal_rilis)->format('d F Y') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status Tayang</th>
+                            <td>{{ $film->is_tayang ? 'Sedang Tayang' : 'Tidak Tayang' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sinopsis</th>
+                            <td>{{ $film->deskripsi }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer d-flex justify-content-end">
+                {{-- Tombol untuk Edit --}}
+                <a href="{{ route('film.edit', $film->id) }}" class="btn btn-warning mr-2">Edit Film</a>
+                
+                {{-- Form untuk Hapus --}}
+                <form action="{{ route('film.destroy', $film->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus film ini?')">Hapus Film</button>
+                </form>
+            </div>
         </div>
-    @endif
-    
+    </div>
 </div>
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Controllers\FilmController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\JadwalTayangController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });

@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <h3 class="card-title text-white">Form Film Baru</h3>
                     </div>
-                    <form action="{{ route('film.store') }}" method="POST">
+                    <form action="{{ route('film.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
                         <div class="card-body">
@@ -82,17 +82,21 @@
                                     @enderror
                                 </div>
                             </div>
-<div class="form-group">
-    <label for="poster_path">URL Poster Film</label>
-    {{-- PASTIKAN TIPE INI ADALAH 'text' agar bisa menerima path lokal --}}
-    <input type="text" name="poster_path" class="form-control @error('poster_path') is-invalid @enderror" id="poster_path" placeholder="cth: images/naruto.jpeg" 
-        value="{{ old('poster_path', $film->poster_path ?? '') }}">
-    @error('poster_path')
-        <span class="invalid-feedback" role="alert">
-            <strong>{{ $message }}</strong>
-        </span>
-    @enderror
-</div>
+                          <div class="form-group">
+                                <label for="poster_path">Poster Film</label>
+                                {{-- Type sudah benar 'file' --}}
+                                <input type="file" 
+                                    name="poster_path" 
+                                    class="form-control-file @error('poster_path') is-invalid @enderror" 
+                                    id="poster_path">  {{-- Hapus atribut value="" --}}
+                                    
+                                <small class="form-text text-muted">Maksimal 2MB (JPG, PNG)</small>
+                                @error('poster_path')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
 
                             {{-- 6. IS_TAYANG Checkbox --}}
                             <div class="form-group clearfix">
