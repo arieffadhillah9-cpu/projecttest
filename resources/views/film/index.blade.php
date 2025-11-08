@@ -37,7 +37,8 @@
                         {{-- DIV WRAPPER: KUNCI UNTUK RASIO POSTER 2:3 (Ganti height: 350px) --}}
                         <div style="position: relative; width: 100%; height: 0; padding-bottom: 150%;"> 
                             <a href="{{ route('film.show', $film->id) }}" style="text-decoration: none;">
-                                <img src="{{ $film->poster_path ? asset($film->poster_path) : asset('images/placeholder.jpg') }}" 
+                                
+                                <img src="{{ $film->poster_path ? asset('storage/' . str_replace('storage/', '', $film->poster_path)) : asset('images/placeholder.jpg') }}" 
                                      alt="Poster {{ $film->judul }}" 
                                      {{-- Styling gambar untuk mengisi wrapper --}}
                                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0.25rem 0.25rem 0 0;">

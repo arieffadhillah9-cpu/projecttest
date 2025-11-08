@@ -43,12 +43,16 @@ class FilmController extends Controller
             'is_tayang' => 'nullable|boolean',
         ]);
         
-        // 2. Proses Upload Gambar
-        if ($request->hasFile('poster_path')) {
-            // Simpan file di storage/app/public/posters
-            $uploadedPath = $request->file('poster_path')->store('public/posters');
-            // Simpan path yang dapat diakses publik (storage/posters/...)
-            $validatedData['poster_path'] = str_replace('public/', 'storage/', $uploadedPath); 
+       if ($request->hasFile('poster_path')) {
+        // 1. Simpan file ke direktori 'posters' menggunakan disk 'public'.
+        //    Ini akan menyimpan file ke: storage/app/public/posters/
+        //    Jalur yang dikembalikan ($uploadedPath) adalah: posters/namafileunik.jpg
+        $uploadedPath = $request->file('poster_path')->store('posters', 'public');
+        
+        // 2. Simpan jalur ke database. Kita perlu menambahkan 'storage/' di depan 
+        //    agar sesuai dengan format yang sudah Anda gunakan (storage/posters/...).
+        //    Jika Anda tidak ingin ada awalan 'storage/', cukup gunakan $uploadedPath.
+        $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
         }
 
         // 3. Simpan ke Database
