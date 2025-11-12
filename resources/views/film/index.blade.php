@@ -1,79 +1,76 @@
-@extends('layout.app')
+@extends('film.adminapp')
 
 @section('content')
-    <div class="content-header">
-        <h1>Daftar Film Tayang</h1>
-        <a href="{{ route('film.create') }}" class="btn btn-success float-right">Tambah Film</a>
+
+{{-- Bagian Jumbotron Hitam (Header Konsisten) --}}
+<div class="jumbotron jumbotron-fluid text-white" style="background-color: #1a1a1a; padding: 50px 0; margin-bottom: 0;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h1 class="display-4 font-weight-bold">Daftar Film Bioskop</h1>
+        {{-- Tombol untuk membuat film baru --}}
+        <a href="{{ route('film.create') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i> Tambah Film Baru
+        </a>
     </div>
+</div>
 
-    <section class="content">
-        <div class="container-fluid">
-
-            {{-- Menampilkan pesan sukses dari method store() (dengan timeout) --}}
-            @if (session('success'))
-                {{-- Pastikan class Bootstrap 'fade show' dan 'alert-dismissible' ada --}}
-                <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    {{-- Tombol X penutup manual (data-dismiss="alert" dari Bootstrap) --}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
-
-            <div class="card">
-                <div class="card-body">
-                    @if ($films->isEmpty())
-                        <p>Belum ada data film yang tersedia. Silakan tambahkan film baru.</p>
-                    @else
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Judul</th>
-                                    <th>Durasi (Menit)</th>
-                                    <th>Tanggal Rilis</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($films as $film)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $film->judul }}</td>
-                                        <td>{{ $film->durasi_menit }}</td>
-                                        <td>{{ $film->tanggal_rilis }}</td>
-                                        <td>
-                                            {{-- Koreksi: Mengubah label dari 'Edit' menjadi 'Detail' karena menggunakan route('film.show') --}}
-                                            <a href="{{ route('film.show', $film->id) }}" class="btn btn-sm btn-info">Detail</a>
-                                            
-                                            {{-- Form Hapus (menggunakan route film.destroy) --}}
-                                            <form action="{{ route('film.destroy', $film->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus film ini?')">Hapus</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
+{{-- Wrapper Konten Utama (Warna Hitam) --}}
+<div class="bg-dark py-5 text-white" style="min-height: 80vh;">
+    <div class="container">
+        
+        {{-- Pesan Sukses/Error --}}
+        @if ($message = Session::get('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ $message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+        @endif
+        
+        {{-- Grid Film Cards --}}
+        <div class="row">
+            @forelse ($films as $film)
+                {{-- Layout Responsif: 4 kolom di layar besar (lg), 3 kolom di md, 2 kolom di sm --}}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card bg-secondary text-white shadow-lg h-100" style="border: none;">
+                        
+                        {{-- DIV WRAPPER: KUNCI UNTUK RASIO POSTER 2:3 (Ganti height: 350px) --}}
+                        <div style="position: relative; width: 100%; height: 0; padding-bottom: 150%;"> 
+                            <a href="{{ route('film.show', $film->id) }}" style="text-decoration: none;">
+                                
+                                <img src="{{ $film->poster_path ? asset('storage/' . str_replace('storage/', '', $film->poster_path)) : asset('images/placeholder.jpg') }}" 
+                                     alt="Poster {{ $film->judul }}" 
+                                     {{-- Styling gambar untuk mengisi wrapper --}}
+                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0.25rem 0.25rem 0 0;">
+                            </a>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title font-weight-bold">{{ $film->judul }}</h5>
+                            <p class="card-text">
+                                <span class="badge badge-info">{{ $film->genre }}</span>
+                                <span class="badge badge-warning">{{ $film->durasi_menit }} Min</span>
+                            </p>
+                            
+                            {{-- Deskripsi dibatasi dan mb-auto memastikan tombol selalu di bawah --}}
+                            <p class="card-text text-sm mb-auto text-muted">{{ Str::limit($film->deskripsi, 50) }}</p>
+                            
+                            <div class="mt-3">
+                                <a href="{{ route('film.show', $film->id) }}" class="btn btn-info btn-block btn-sm">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12">
+                    <div class="alert alert-warning text-center mt-4">
+                        Tidak ada film yang tersedia saat ini. Silakan tambahkan film baru!
+                    </div>
+                </div>
+            @endforelse
         </div>
-    </section>
+    </div>
+</div>
 @endsection
-
-{{-- PUSH SCRIPT DI BAWAH SECTION CONTENT --}}
-@push('scripts') 
-<script>
-    // Pastikan jQuery tersedia di layout Anda
-    $(document).ready(function(){
-        // Seleksi alert dengan ID 'success-alert', delay 4 detik, slide up 0.5 detik, lalu tutup alert.
-        $("#success-alert").delay(4000).slideUp(500, function(){
-            $(this).alert('close'); 
-        });
-    });
-</script>
-@endpush
