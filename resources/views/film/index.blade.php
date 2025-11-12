@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('film.adminapp')
 
 @section('content')
 
