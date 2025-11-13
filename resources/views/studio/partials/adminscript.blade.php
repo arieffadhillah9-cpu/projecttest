@@ -4,9 +4,9 @@
       <!-- AdminLTE App -->
       <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}">
       
-     <script>
+      <script>
     console.log("adminscript.blade.php berhasil dimuat!");
-    </script>
+</script>
 
 <!-- Menggunakan CDN untuk memastikan jQuery dan Bootstrap termuat -->
 

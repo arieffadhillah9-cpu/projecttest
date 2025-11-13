@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('film.adminapp')
 
 @section('content')
     <div class="content-header">
@@ -85,7 +85,32 @@
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
-                        
+                        {{-- 8. Checkbox IS_TAYANG (DENGAN PERBAIKAN) --}}
+                        <div class="form-group clearfix">
+                            {{-- PENTING: Hidden field untuk memastikan nilai 0 terkirim --}}
+                            <input type="hidden" name="is_tayang" value="0">
+                            
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       id="is_tayang" 
+                                       name="is_tayang" 
+                                       value="1" 
+                                       {{-- Logika untuk menampilkan nilai lama (old) atau nilai film saat ini --}}
+                                       @checked(old('is_tayang', $film->is_tayang)) 
+                                >
+                                <label class="form-check-label" for="is_tayang">
+                                    Film Sedang Tayang (Centang jika ya)
+                                </label>
+                            </div>
+                            @error('is_tayang')
+                                <span class="invalid-feedback d-block" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        {{-- END Checkbox IS_TAYANG --}}
+
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                         <a href="{{ route('film.show', $film->id) }}" class="btn btn-secondary">Batal</a>
                     </form>

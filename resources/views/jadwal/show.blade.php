@@ -1,5 +1,5 @@
 
-@extends('film.adminapp')
+@extends('jadwal.jadwalapp')
 
 @section('content')
 

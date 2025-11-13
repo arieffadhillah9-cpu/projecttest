@@ -11,22 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-       // Isi database/migrations/..._create_jadwal_tayangs_table.php
-    // Isi database/migrations/..._create_jadwal_tayangs_table.php
+        Schema::create('jadwal_tayangs', function (Blueprint $table) {
+            $table->id();
 
-Schema::create('jadwal_tayangs', function (Blueprint $table) {
-    $table->id();
+            // Kunci Asing (Foreign Key) ke tabel films
+            // Memastikan data di kolom ini adalah ID yang valid di tabel films
+            $table->foreignId('film_id')->constrained('films')->onDelete('cascade');
+            
+            // Kunci Asing (Foreign Key) ke tabel studios
+            $table->foreignId('studio_id')->constrained('studios')->onDelete('cascade');
 
-    // Pastikan ini menunjuk ke tabel 'films'
-    $table->foreignId('film_id')->constrained('films')->onDelete('cascade'); 
-    
-    // Pastikan ini menunjuk ke tabel 'studios'
-    $table->foreignId('studio_id')->constrained('studios')->onDelete('cascade'); 
-    
-    $table->dateTime('waktu_tayang')->unique();
-    $table->decimal('harga_tiket', 10, 2); 
-    $table->timestamps();
-});
+            $table->date('tanggal');
+            $table->time('jam_mulai');
+            $table->unsignedInteger('harga'); // Harga tiket, harus positif
+            
+            // Kolom unik ganda: Tidak boleh ada film yang sama di studio yang sama pada jam dan tanggal yang persis sama
+            $table->unique(['studio_id', 'tanggal', 'jam_mulai'], 'unique_schedule');
+            
+            $table->timestamps();
+        });
     }
 
     /**
