@@ -13,6 +13,7 @@ class Studio extends Model
     protected $fillable = [
         'nama', 
         'kapasitas', 
+        'tipe_layar',
         // Tambahkan kolom lain jika ada
     ];
     
@@ -20,4 +21,8 @@ class Studio extends Model
     // public function jadwalTayang() {
     //     return $this->hasMany(JadwalTayang::class);
     // }
+    public function jadwalTayangs()
+    {
+        return $this->hasMany(JadwalTayang::class);
+    }
 }

@@ -25,8 +25,10 @@ class Film extends Model
     ];
 
     // Tambahkan relasi di sini (seperti yang kita bahas sebelumnya)
-    public function jadwals()
+     public function jadwalTayangs()
     {
+        // Pastikan nama method ini diubah menjadi plural (jadwalTayangs)
+        // dan mengarah ke Model JadwalTayang.
         return $this->hasMany(JadwalTayang::class);
     }
 }

@@ -32,6 +32,7 @@ class StudioController extends Controller
         $validatedData = $request->validate([
             'nama' => 'required|string|max:100|unique:studios,nama',
             'kapasitas' => 'required|integer|min:1',
+            'tipe_layar' => 'nullable|string|in:2D Standard,IMAX,Dolby Atmos,Premiere',
         ]);
 
         Studio::create($validatedData);
@@ -67,6 +68,7 @@ class StudioController extends Controller
             // Tambahkan pengecualian untuk studio yang sedang diedit (Rule unik)
             'nama' => 'required|string|max:100|unique:studios,nama,' . $studio->id,
             'kapasitas' => 'required|integer|min:1',
+            'tipe_layar' => 'nullable|string|in:2D Standard,IMAX,Dolby Atmos,Premiere',
         ]);
 
         $studio->update($validatedData);

@@ -43,7 +43,7 @@
                             <div class="row">
                                 <div class="col-md-6 form-group">
                                     <label for="durasi_menit">Durasi (Menit)</label>
-                                    <input type="number" name="durasi_menit" class="form-control @error('durasi_menit') is-invalid @enderror" id="durasi_menit" value="{{ old('durasi_menit') }}" required min="1">
+                                    <input type="number" name="durasi_menit" class="form-control @error('durasi_menit') is-invalid @enderror" id="durasi_menit" placeholder="Durasi (Menit)" value="{{ old('durasi_menit') }}" required min="1">
                                     @error('durasi_menit')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -98,10 +98,20 @@
                                 @enderror
                             </div>
 
-                            {{-- 6. IS_TAYANG Checkbox --}}
+                            {{-- 6. IS_TAYANG Checkbox (PERBAIKAN FUNGSI) --}}
                             <div class="form-group clearfix">
+                                
+                                {{-- Langkah 1 (PENTING): Hidden field ini memastikan nilai 0 dikirim jika checkbox tidak dicentang --}}
+                                <input type="hidden" name="is_tayang" value="0"> 
+                                
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="is_tayang" name="is_tayang" value="1" {{ old('is_tayang') ? 'checked' : '' }}>
+                                    {{-- Langkah 2: Checkbox yang sebenarnya (mengirim nilai 1 jika dicentang) --}}
+                                    <input type="checkbox" 
+                                        class="form-check-input" 
+                                        id="is_tayang" 
+                                        name="is_tayang" 
+                                        value="1" 
+                                        {{ old('is_tayang') == 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_tayang">
                                         Film Sedang Tayang (Centang jika ya)
                                     </label>

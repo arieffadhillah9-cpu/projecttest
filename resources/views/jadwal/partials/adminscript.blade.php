@@ -6,7 +6,7 @@
       
      <script>
     console.log("adminscript.blade.php berhasil dimuat!");
-    </script>
+</script>
 
 <!-- Menggunakan CDN untuk memastikan jQuery dan Bootstrap termuat -->
 
