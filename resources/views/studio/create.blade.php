@@ -1,23 +1,25 @@
-@extends('studio.studioapp')
+@extends('layout.app') {{-- Menggunakan layout utama yang sudah diperbaiki --}}
 
 @section('content')
 
-{{-- Header Konsisten --}}
-<div class="jumbotron jumbotron-fluid text-white" style="background-color: #1a1a1a; padding: 50px 0; margin-bottom: 0;">
-    <div class="container d-flex justify-content-start align-items-center">
-        <a href="{{ route('studio.index') }}" class="btn btn-secondary btn-lg mr-3">
-            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
-        </a>
-        <h1 class="display-4 font-weight-bold">Tambah Studio Baru</h1>
-    </div>
-</div>
-
 {{-- Wrapper Konten Utama (Form) --}}
-<div class="py-5" style="background-color: #2c2c2c; min-height: 80vh;">
-    <div class="container">
+{{-- Menggunakan content-wrapper bg-black agar serasi dengan layout --}}
+<div class="content-wrapper bg-black text-white py-5" style="min-height: 80vh;">
+    <div class="container-fluid">
         
-        <div class="card bg-secondary text-white shadow-lg mx-auto" style="max-width: 700px;">
-            <div class="card-header bg-dark text-white">
+        {{-- Header Konten --}}
+        <div class="container d-flex justify-content-start align-items-center mb-4 px-0">
+            <a href="{{ route('studio.index') }}" class="btn btn-secondary mr-3">
+                <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+            </a>
+            {{-- Mengganti display-4 menjadi h2 --}}
+            <h2 class="font-weight-bold">Tambah Studio Baru</h2>
+        </div>
+
+        {{-- Card Form --}}
+        {{-- PERUBAHAN: Mengganti bg-secondary pada card menjadi bg-black --}}
+        <div class="card bg-black text-white border-secondary shadow-lg mx-auto" style="max-width: 700px;"> 
+            <div class="card-header bg-dark text-white border-bottom border-secondary">
                 <h4 class="mb-0">Form Studio</h4>
             </div>
             <div class="card-body">
@@ -82,7 +84,8 @@
                         @enderror
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block mt-4"><i class="fas fa-plus"></i> Tambah Studio</button>
+                    {{-- PERUBAHAN: Mengganti warna tombol Tambah menjadi btn-danger --}}
+                    <button type="submit" class="btn btn-danger btn-block mt-4"><i class="fas fa-plus"></i> Tambah Studio</button>
                 </form>
 
             </div>
