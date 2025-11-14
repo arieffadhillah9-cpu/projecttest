@@ -30,7 +30,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3">
-                        <label class="text-white">CHOOSE DATE</label>
+                        <label class="text-white">CHOSE DATE</label>
                         <div class="d-flex text-white">
                             <a href="#" class="text-white mr-3">MON <span class="badge bg-danger">30</span></a>
                             <a href="#" class="text-white mr-3">TUE</a>
