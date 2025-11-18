@@ -1,8 +1,9 @@
-@extends('layout.app') {{-- Pastikan menggunakan layout utama yang sudah diperbaiki --}}
+@extends('admin.studio.studioapp') {{-- Menggunakan layout utama yang sudah diperbaiki --}}
 
 @section('content')
 
 {{-- Wrapper Konten Utama (Form) --}}
+{{-- Menggunakan content-wrapper bg-black agar serasi dengan layout --}}
 <div class="content-wrapper bg-black text-white py-5" style="min-height: 80vh;">
     <div class="container-fluid">
         
@@ -11,14 +12,15 @@
             <a href="{{ route('studio.index') }}" class="btn btn-secondary mr-3">
                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar
             </a>
-            {{-- JUDUL: Menampilkan nama studio yang diedit --}}
-            <h2 class="font-weight-bold">Edit Studio: {{ $studio->nama }}</h2>
+            {{-- Mengganti display-4 menjadi h2 --}}
+            <h2 class="font-weight-bold">Tambah Studio Baru</h2>
         </div>
 
-        {{-- Card Form - Menggunakan bg-black sesuai permintaan --}}
-        <div class="card bg-black text-white border-secondary shadow-lg mx-auto" style="max-width: 700px;">
+        {{-- Card Form --}}
+        {{-- PERUBAHAN: Mengganti bg-secondary pada card menjadi bg-black --}}
+        <div class="card bg-black text-white border-secondary shadow-lg mx-auto" style="max-width: 700px;"> 
             <div class="card-header bg-dark text-white border-bottom border-secondary">
-                <h4 class="mb-0">Form Perubahan Studio</h4>
+                <h4 class="mb-0">Form Studio</h4>
             </div>
             <div class="card-body">
 
@@ -33,10 +35,8 @@
                     </div>
                 @endif
 
-                {{-- Form untuk Update --}}
-                <form action="{{ route('studio.update', $studio->id) }}" method="POST">
+                <form action="{{ route('studio.store') }}" method="POST">
                     @csrf
-                    @method('PUT') {{-- PENTING: Method untuk UPDATE --}}
                     
                     {{-- Nama Studio --}}
                     <div class="form-group">
@@ -45,7 +45,7 @@
                                name="nama" 
                                class="form-control bg-dark text-white @error('nama') is-invalid @enderror" 
                                id="nama" 
-                               value="{{ old('nama', $studio->nama) }}" {{-- Memuat data lama --}}
+                               value="{{ old('nama') }}"
                                placeholder="Masukkan nama studio (misal: Studio 1 atau IMAX)">
                         @error('nama')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -59,7 +59,7 @@
                                name="kapasitas" 
                                class="form-control bg-dark text-white @error('kapasitas') is-invalid @enderror" 
                                id="kapasitas" 
-                               value="{{ old('kapasitas', $studio->kapasitas) }}" {{-- Memuat data lama --}}
+                               value="{{ old('kapasitas') }}"
                                placeholder="Masukkan jumlah kursi (min. 1)"
                                min="1">
                         @error('kapasitas')
@@ -73,29 +73,19 @@
                         <select name="tipe_layar" 
                                 class="form-control bg-dark text-white @error('tipe_layar') is-invalid @enderror" 
                                 id="tipe_layar">
-                            <option value="" disabled>Pilih Tipe Layar</option>
-                            @php
-                                $tipeLayarOptions = ['2D Standard', 'IMAX', 'Dolby Atmos', 'Premiere'];
-                            @endphp
-                            @foreach ($tipeLayarOptions as $option)
-                                <option value="{{ $option }}" 
-                                    {{ old('tipe_layar', $studio->tipe_layar) == $option ? 'selected' : '' }}>
-                                    {{ $option }}
-                                </option>
-                            @endforeach
+                            <option value="" selected disabled>Pilih Tipe Layar</option>
+                            <option value="2D Standard" {{ old('tipe_layar') == '2D Standard' ? 'selected' : '' }}>2D Standard</option>
+                            <option value="IMAX" {{ old('tipe_layar') == 'IMAX' ? 'selected' : '' }}>IMAX</option>
+                            <option value="Dolby Atmos" {{ old('tipe_layar') == 'Dolby Atmos' ? 'selected' : '' }}>Dolby Atmos</option>
+                            <option value="Premiere" {{ old('tipe_layar') == 'Premiere' ? 'selected' : '' }}>Premiere</option>
                         </select>
                         @error('tipe_layar')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     
-                    {{-- Tombol Aksi --}}
-                    <div class="d-flex justify-content-between pt-3">
-                        {{-- Tombol Perbarui (Update) --}}
-                        <button type="submit" class="btn btn-warning btn-lg"><i class="fas fa-sync"></i> Perbarui Studio</button>
-                        {{-- Tombol Batal --}}
-                        <a href="{{ route('studio.index') }}" class="btn btn-danger btn-lg"><i class="fas fa-times"></i> Batal</a>
-                    </div>
+                    {{-- PERUBAHAN: Mengganti warna tombol Tambah menjadi btn-danger --}}
+                    <button type="submit" class="btn btn-danger btn-block mt-4"><i class="fas fa-plus"></i> Tambah Studio</button>
                 </form>
 
             </div>

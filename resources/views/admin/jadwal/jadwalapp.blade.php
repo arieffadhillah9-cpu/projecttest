@@ -9,12 +9,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seatly</title>
 
-  @include('film.partials.adminstyle')
+  @include('admin.jadwal.partials.adminstyle')
   
 <body class="hold-transition sidebar-collapse bg-dark">
   <div class="wrapper">
     <!-- Navbar -->
-            @include('film.partials.adminnavbar')
+            @include('admin.jadwal.partials.adminnavbar')
     <!-- /Navbar -->
      <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -42,12 +42,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Main Footer -->
       <footer class="main-footer bg-dark text-white border-top-0" style="background-color: #000000 !important; padding: 20px 0;">
         <!-- To the right -->
-       @include('film.partials.adminfooter')
+       @include('admin.jadwal.partials.adminfooter')
       </footer>
   </div>
       <!-- ./wrapper -->
        <!-- jQuery -->
-       @include('film.partials.adminscript')
+       @include('admin.jadwal.partials.adminscript')
       <!-- REQUIRED SCRIPTS -->
      
 </body>

@@ -13,7 +13,7 @@ class StudioController extends Controller
     public function index()
     {
         $studios = Studio::orderBy('id', 'desc')->get();
-        return view('studio.index', compact('studios'));
+        return view('admin.studio.index', compact('studios'));
     }
 
     /**
@@ -21,7 +21,7 @@ class StudioController extends Controller
      */
     public function create()
     {
-        return view('studio.create');
+        return view('admin.studio.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class StudioController extends Controller
 
         Studio::create($validatedData);
 
-        return redirect()->route('studio.index')
+        return redirect()->route('admin.studio.index')
                          ->with('success', 'Studio berhasil ditambahkan!');
     }
 
@@ -48,7 +48,7 @@ class StudioController extends Controller
     {
         // Dalam kasus Studio, show biasanya tidak terlalu diperlukan,
         // tapi kita biarkan dulu sesuai resource route.
-        return view('studio.show', compact('studio'));
+        return view('admin.studio.show', compact('studio'));
     }
 
     /**
@@ -56,7 +56,7 @@ class StudioController extends Controller
      */
     public function edit(Studio $studio)
     {
-        return view('studio.edit', compact('studio'));
+        return view('admin.studio.edit', compact('studio'));
     }
 
     /**
@@ -73,7 +73,7 @@ class StudioController extends Controller
 
         $studio->update($validatedData);
 
-        return redirect()->route('studio.index')
+        return redirect()->route('admin.studio.index')
                          ->with('success', 'Studio berhasil diupdate!');
     }
 
@@ -82,9 +82,18 @@ class StudioController extends Controller
      */
     public function destroy(Studio $studio)
     {
-        $studio->delete();
-
-        return redirect()->route('studio.index')
-                         ->with('success', 'Studio berhasil dihapus!');
+        try {
+            $studio->delete();
+    
+            // [PERUBAHAN] Mengarahkan ke rute 'admin.studio.index'
+            return redirect()->route('admin.studio.index')
+                             ->with('success', 'Studio berhasil dihapus!');
+        } catch (QueryException $e) {
+            // Tangani QueryException (biasanya karena Foreign Key Constraint)
+            // Error ini terjadi jika studio masih memiliki Jadwal Tayang terkait.
+            // [PERUBAHAN] Mengarahkan ke rute 'admin.studio.index'
+            return redirect()->route('admin.studio.index')
+                             ->with('error', 'Gagal menghapus studio. Studio ini masih digunakan dalam Jadwal Tayang.');
+        }
     }
 }

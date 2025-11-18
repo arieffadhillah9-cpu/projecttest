@@ -1,4 +1,4 @@
-@extends('film.adminapp')
+@extends('admin.film.adminapp')
 
 @section('content')
     <div class="container py-5">

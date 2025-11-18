@@ -14,7 +14,8 @@ class FilmController extends Controller
     public function index()
     {
         $films = Film::orderBy('id', 'desc')->get();
-        return view('film.index', compact('films'));
+        // [PERUBAHAN] Mengarahkan ke view 'admin.film.index'
+        return view('admin.film.index', compact('films')); 
     }
 
     /**
@@ -22,7 +23,8 @@ class FilmController extends Controller
      */
     public function create()
     {
-        return view('film.create');
+        // [PERUBAHAN] Mengarahkan ke view 'admin.film.create'
+        return view('admin.film.create');
     }
 
     /**
@@ -38,38 +40,34 @@ class FilmController extends Controller
             'sutradara' => 'nullable|string|max:100',
             'genre' => 'required|string|max:100',
             'tanggal_rilis' => 'required|date',
-            // Gunakan 'poster_path' sesuai dengan nama kolom DB dan nama input file
             'poster_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
             'is_tayang' => 'nullable|boolean',
         ]);
         
-       if ($request->hasFile('poster_path')) {
-        // 1. Simpan file ke direktori 'posters' menggunakan disk 'public'.
-        //    Ini akan menyimpan file ke: storage/app/public/posters/
-        //    Jalur yang dikembalikan ($uploadedPath) adalah: posters/namafileunik.jpg
-        $uploadedPath = $request->file('poster_path')->store('posters', 'public');
-        
-        // 2. Simpan jalur ke database. Kita perlu menambahkan 'storage/' di depan 
-        //    agar sesuai dengan format yang sudah Anda gunakan (storage/posters/...).
-        //    Jika Anda tidak ingin ada awalan 'storage/', cukup gunakan $uploadedPath.
-        $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
+        if ($request->hasFile('poster_path')) {
+            // Simpan file ke direktori 'posters' menggunakan disk 'public'.
+            $uploadedPath = $request->file('poster_path')->store('posters', 'public');
+            
+            // Simpan jalur dengan awalan 'storage/'
+            $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
         }
 
         // 3. Simpan ke Database
         Film::create($validatedData);
 
         // 4. Redirect dan Tampilkan Pesan Sukses
-        return redirect()->route('film.index')
+        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
+        return redirect()->route('admin.film.index')
                          ->with('success', 'Film baru berhasil ditambahkan!');
     }
     
-
     /**
      * Menampilkan detail spesifik dari satu film.
      */
     public function show(Film $film)
     {
-        return view('film.show', compact('film'));
+        // [PERUBAHAN] Mengarahkan ke view 'admin.film.show'
+        return view('admin.film.show', compact('film'));
     }
 
     /**
@@ -77,8 +75,8 @@ class FilmController extends Controller
      */
     public function edit(Film $film)
     {
-        // Mengembalikan view 'film.edit' dan membawa data film yang akan diedit
-        return view('film.edit', compact('film'));
+        // [PERUBAHAN] Mengarahkan ke view 'admin.film.edit'
+        return view('admin.film.edit', compact('film'));
     }
 
     /**
@@ -88,7 +86,6 @@ class FilmController extends Controller
     {
         // 1. Validasi Data
         $validatedData = $request->validate([
-            // Mengecualikan judul film saat ini agar tidak ada error unique jika judul tidak diubah
             'judul' => 'required|string|max:255|unique:films,judul,' . $film->id, 
             'deskripsi' => 'required',
             'durasi_menit' => 'required|integer|min:1',
@@ -110,18 +107,11 @@ class FilmController extends Controller
             }
 
             // Simpan gambar baru
-            $uploadedPath = $request->file('poster_path')->store('public/posters');
-            $validatedData['poster_path'] = str_replace('public/', 'storage/', $uploadedPath); 
+            $uploadedPath = $request->file('poster_path')->store('posters', 'public');
+            $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
         } else {
-            // Jika tidak ada file baru, pastikan poster_path lama tetap ada (hanya update field lain)
-            // Cek apakah user mengirim input hidden untuk menghapus gambar atau tidak (untuk kasus lain, kita biarkan saja)
-            
-            // Jika Anda ingin mempertahankan poster_path yang lama jika tidak ada upload baru:
-            // Karena kita menggunakan $validatedData, jika poster_path tidak ada di request, ia tidak akan ada di validatedData.
-            // Kita harus secara eksplisit memasukkannya kembali ke validatedData jika tidak di-upload.
-            if ($request->method() === 'PUT' || $request->method() === 'PATCH') {
-                unset($validatedData['poster_path']);
-            }
+            // Jika tidak ada file baru, hapus 'poster_path' dari validatedData agar path lama tidak ditimpa oleh NULL.
+            unset($validatedData['poster_path']);
         }
 
 
@@ -129,7 +119,8 @@ class FilmController extends Controller
         $film->update($validatedData);
 
         // 4. Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('film.index')
+        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
+        return redirect()->route('admin.film.index')
                          ->with('success', 'Film berhasil diupdate!');
     }
     
@@ -146,11 +137,13 @@ class FilmController extends Controller
         
         // 2. Hapus data dari database
         if ($film->delete()) {
-            return redirect()->route('film.index')
+            // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
+            return redirect()->route('admin.film.index')
                              ->with('success', 'Film berhasil dihapus.');
         }
 
-        return redirect()->route('film.index')
+        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
+        return redirect()->route('admin.film.index')
                          ->with('error', 'Gagal menghapus film.');
     }
 }

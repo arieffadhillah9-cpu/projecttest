@@ -1,5 +1,4 @@
-@extends('film.adminapp')
-
+@extends('admin.film.adminapp')
 @section('content')
 
 {{-- Bagian Jumbotron Hitam (Header Konsisten) --}}

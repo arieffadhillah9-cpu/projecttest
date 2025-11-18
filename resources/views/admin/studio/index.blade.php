@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('admin.studio.studioapp')
 
 @section('content')
 

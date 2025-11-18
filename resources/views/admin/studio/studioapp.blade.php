@@ -9,12 +9,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seatly</title>
 
-  @include('studio.partials.adminstyle')
+  @include('admin.studio.partials.adminstyle')
   
 <body class="hold-transition sidebar-collapse bg-dark">
   <div class="wrapper">
     <!-- Navbar -->
-            @include('studio.partials.adminnavbar')
+            @include('admin.studio.partials.adminnavbar')
     <!-- /Navbar -->
      <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -42,12 +42,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Main Footer -->
       <footer class="main-footer bg-dark text-white border-top-0" style="background-color: #000000 !important; padding: 20px 0;">
         <!-- To the right -->
-       @include('studio.partials.adminfooter')
+       @include('admin.studio.partials.adminfooter')
       </footer>
   </div>
       <!-- ./wrapper -->
        <!-- jQuery -->
-       @include('studio.partials.adminscript')
+       @include('admin.studio.partials.adminscript')
       <!-- REQUIRED SCRIPTS -->
      
 </body>

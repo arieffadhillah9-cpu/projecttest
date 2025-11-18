@@ -1,5 +1,5 @@
 
-@extends('film.adminapp')
+@extends('admin.film.adminapp')
 
 @section('content')
 
