@@ -14,7 +14,7 @@ class FilmController extends Controller
     public function index()
     {
         $films = Film::orderBy('id', 'desc')->get();
-        return view('film.index', compact('films'));
+        return view('admin.film.index', compact('films'));
     }
 
     /**
@@ -22,7 +22,7 @@ class FilmController extends Controller
      */
     public function create()
     {
-        return view('film.create');
+        return view('admin.film.create');
     }
 
     /**
@@ -69,7 +69,7 @@ class FilmController extends Controller
      */
     public function show(Film $film)
     {
-        return view('film.show', compact('film'));
+        return view('admin.film.show', compact('film'));
     }
 
     /**
@@ -78,7 +78,7 @@ class FilmController extends Controller
     public function edit(Film $film)
     {
         // Mengembalikan view 'film.edit' dan membawa data film yang akan diedit
-        return view('film.edit', compact('film'));
+        return view('admin.film.edit', compact('film'));
     }
 
     /**
@@ -129,7 +129,7 @@ class FilmController extends Controller
         $film->update($validatedData);
 
         // 4. Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('film.index')
+        return redirect()->route('admin.film.index')
                          ->with('success', 'Film berhasil diupdate!');
     }
     
@@ -146,11 +146,11 @@ class FilmController extends Controller
         
         // 2. Hapus data dari database
         if ($film->delete()) {
-            return redirect()->route('film.index')
+            return redirect()->route('admin.film.index')
                              ->with('success', 'Film berhasil dihapus.');
         }
 
-        return redirect()->route('film.index')
+        return redirect()->route('admin.film.index')
                          ->with('error', 'Gagal menghapus film.');
     }
 }

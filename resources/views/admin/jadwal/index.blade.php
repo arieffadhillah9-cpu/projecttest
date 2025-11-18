@@ -212,6 +212,5 @@
         });
     });
 </script>
-@endpush
 
 @endsection

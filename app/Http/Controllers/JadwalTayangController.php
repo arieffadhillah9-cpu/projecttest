@@ -21,7 +21,7 @@ class JadwalTayangController extends Controller
                                     ->orderBy('jam_mulai', 'asc')
                                     ->paginate(10); 
 
-        return view('jadwal.index', compact('jadwalTayangs'));
+        return view('admin.jadwal.index', compact('jadwalTayangs'));
     }
 
     /**
@@ -41,7 +41,7 @@ class JadwalTayangController extends Controller
                 ->with('error', 'Tidak ada film yang sedang tayang. Harap tandai film sebagai "Sedang Tayang" terlebih dahulu.');
         }
 
-        return view('jadwal.create', compact('films', 'studios'));
+        return view('admin.jadwal.create', compact('films', 'studios'));
     }
 
     /**
@@ -69,7 +69,7 @@ class JadwalTayangController extends Controller
 
         JadwalTayang::create($validatedData);
 
-        return redirect()->route('jadwal.index')
+        return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang baru berhasil ditambahkan!');
     }
       
@@ -85,7 +85,7 @@ class JadwalTayangController extends Controller
                  ->orderBy('judul')
                  ->get();
 
-    return view('jadwal.edit', [
+    return view('admin.jadwal.edit', [
         'jadwalTayang' => $jadwal, // boleh alias di sini
         'films' => $films,
         'studios' => $studios,
@@ -112,7 +112,7 @@ class JadwalTayangController extends Controller
 
         $jadwalTayang->update($validatedData);
 
-        return redirect()->route('jadwal.index')
+        return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang berhasil diperbarui!');
     }
 
@@ -126,7 +126,7 @@ class JadwalTayangController extends Controller
         // Jika tidak, Anda perlu implementasi logika yang lebih ketat.
         $jadwalTayang->delete();
 
-        return redirect()->route('jadwal.index')
+        return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang berhasil dihapus.');
     }
     
