@@ -117,13 +117,13 @@
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
 
-                                            <button type="button"
-                                                class="btn btn-sm btn-danger delete-btn"
-                                                data-id="{{ $jadwal->id }}"
-                                                data-toggle="modal"
-                                                data-target="#deleteModal">
-                                                <i class="fas fa-trash"></i> Hapus
-                                            </button>
+                                            <form action="{{ route('jadwal.destroy', $jadwal->id) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus jadwal tayang untuk film {{ $jadwal->film->judul }} pada studio {{ $jadwal->studio->nama }}?')">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
 
