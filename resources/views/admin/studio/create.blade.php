@@ -1,4 +1,4 @@
-@extends('admin.studio.studioapp') {{-- Menggunakan layout utama yang sudah diperbaiki --}}
+@extends('admin.layout.adminapp')
 
 @section('content')
 

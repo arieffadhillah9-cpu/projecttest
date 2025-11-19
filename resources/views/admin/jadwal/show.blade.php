@@ -1,5 +1,5 @@
 
-@extends('admin.jadwal.jadwalapp')
+@extends('admin.layout.adminapp')
 
 @section('content')
 
