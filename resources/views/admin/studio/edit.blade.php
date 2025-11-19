@@ -8,7 +8,7 @@
         
         {{-- Header Konten --}}
         <div class="container d-flex justify-content-start align-items-center mb-4 px-0">
-            <a href="{{ route('studio.index') }}" class="btn btn-secondary mr-3">
+            <a href="{{ route('admin.studio.index') }}" class="btn btn-secondary mr-3">
                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar
             </a>
             {{-- JUDUL: Menampilkan nama studio yang diedit --}}
@@ -34,7 +34,7 @@
                 @endif
 
                 {{-- Form untuk Update --}}
-                <form action="{{ route('studio.update', $studio->id) }}" method="POST">
+                <form action="{{ route('admin.studio.update', $studio->id) }}" method="POST">
                     @csrf
                     @method('PUT') {{-- PENTING: Method untuk UPDATE --}}
                     
@@ -94,7 +94,7 @@
                         {{-- Tombol Perbarui (Update) --}}
                         <button type="submit" class="btn btn-warning btn-lg"><i class="fas fa-sync"></i> Perbarui Studio</button>
                         {{-- Tombol Batal --}}
-                        <a href="{{ route('studio.index') }}" class="btn btn-danger btn-lg"><i class="fas fa-times"></i> Batal</a>
+                        <a href="{{ route('admin.studio.index') }}" class="btn btn-danger btn-lg"><i class="fas fa-times"></i> Batal</a>
                     </div>
                 </form>
 

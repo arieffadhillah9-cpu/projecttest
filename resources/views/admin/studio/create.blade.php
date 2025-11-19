@@ -9,7 +9,7 @@
         
         {{-- Header Konten --}}
         <div class="container d-flex justify-content-start align-items-center mb-4 px-0">
-            <a href="{{ route('studio.index') }}" class="btn btn-secondary mr-3">
+            <a href="{{ route('admin.studio.index') }}" class="btn btn-secondary mr-3">
                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar
             </a>
             {{-- Mengganti display-4 menjadi h2 --}}
@@ -35,7 +35,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('studio.store') }}" method="POST">
+                <form action="{{ route('admin.studio.store') }}" method="POST">
                     @csrf
                     
                     {{-- Nama Studio --}}

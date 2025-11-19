@@ -23,7 +23,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('jadwal.update', $jadwalTayang->id) }}" method="POST">
+                    <form action="{{ route('admin.jadwal.update', $jadwalTayang->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -91,7 +91,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                        <a href="{{ route('jadwal.index') }}" class="btn btn-secondary">Batal</a>
+                        <a href="{{ route('admin.jadwal.index') }}" class="btn btn-secondary">Batal</a>
                     </form>
 
                 </div>

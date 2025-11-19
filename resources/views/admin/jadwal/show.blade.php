@@ -18,7 +18,7 @@
             
             <div class="card-header border-0">
                 {{-- Tombol Kembali --}}
-                <a href="{{ route('film.index') }}" class="btn btn-info">
+                <a href="{{ route('admin.film.index') }}" class="btn btn-info">
                     <i class="fas fa-arrow-left"></i> Kembali ke Daftar
                 </a>
             </div>
@@ -62,10 +62,10 @@
 
             <div class="card-footer d-flex justify-content-end">
                 {{-- Tombol untuk Edit --}}
-                <a href="{{ route('film.edit', $film->id) }}" class="btn btn-warning mr-2">Edit Film</a>
+                <a href="{{ route('admin.film.edit', $film->id) }}" class="btn btn-warning mr-2">Edit Film</a>
                 
                 {{-- Form untuk Hapus --}}
-                <form action="{{ route('film.destroy', $film->id) }}" method="POST" style="display:inline;">
+                <form action="{{ route('admin.film.destroy', $film->id) }}" method="POST" style="display:inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus film ini?')">Hapus Film</button>

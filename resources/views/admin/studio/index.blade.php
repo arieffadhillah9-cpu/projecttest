@@ -20,7 +20,7 @@
                     </h2>
                     
                     {{-- Tombol Tambah Studio --}}
-                    <a href="{{ route('studio.create') }}" 
+                    <a href="{{ route('admin.studio.create') }}" 
                        class="btn btn-danger d-flex align-items-center"
                        style="white-space: nowrap;">
                         <i class="fas fa-plus mr-1"></i> Tambah Studio
@@ -63,7 +63,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
-                                            <a href="{{ route('studio.show', $studio->id) }}" class="text-warning font-weight-bold">
+                                            <a href="{{ route('admin.studio.show', $studio->id) }}" class="text-warning font-weight-bold">
                                                 {{ $studio->nama }}
                                             </a>
                                         </td>
@@ -72,10 +72,10 @@
                                             <span class="badge badge-danger">{{ $studio->tipe_layar ?? '2D Standard' }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('studio.edit', $studio->id) }}" class="btn btn-sm btn-warning mr-2">
+                                            <a href="{{ route('admin.studio.edit', $studio->id) }}" class="btn btn-sm btn-warning mr-2">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
-                                            <form action="{{ route('studio.destroy', $studio->id) }}" method="POST" style="display:inline-block;">
+                                            <form action="{{ route('admin.studio.destroy', $studio->id) }}" method="POST" style="display:inline-block;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus studio {{ $studio->nama }}?')">

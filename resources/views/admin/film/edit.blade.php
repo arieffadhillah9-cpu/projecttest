@@ -11,7 +11,7 @@
                 <div class="card-body">
                     
                     {{-- Form mengarah ke method UPDATE dan menggunakan method PUT --}}
-                    <form action="{{ route('film.update', $film->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.film.update', $film->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT') 
                         
@@ -112,7 +112,7 @@
                         {{-- END Checkbox IS_TAYANG --}}
 
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                        <a href="{{ route('film.show', $film->id) }}" class="btn btn-secondary">Batal</a>
+                        <a href="{{ route('admin.film.show', $film->id) }}" class="btn btn-secondary">Batal</a>
                     </form>
 
                 </div>

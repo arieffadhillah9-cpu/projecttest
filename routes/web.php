@@ -51,7 +51,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     // a. Dashboard Admin (Mengatasi ERROR: route('admin.dashboard') not defined)
     // URL: /admin
     // Name: admin.dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard'); 
+    Route::get('/dashboardmin', [DashboardController::class, 'index'])->name('dashboardmin'); 
 
     // b. Resource Routes CRUD (Sekarang memiliki nama admin.film.index, admin.studio.index, dll.)
     // URL: /admin/film, /admin/studio, /admin/jadwal

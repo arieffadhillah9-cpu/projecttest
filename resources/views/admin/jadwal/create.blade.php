@@ -35,7 +35,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('jadwal.store') }}" method="POST">
+                    <form action="{{ route(admin.jadwal.store') }}" method="POST">
                         @csrf
 
                         {{-- 1. PILIH FILM --}}
@@ -115,7 +115,7 @@
                             <button type="submit" class="btn btn-danger font-weight-bold">
                                 <i class="fas fa-save mr-1"></i> Simpan Jadwal
                             </button>
-                            <a href="{{ route('jadwal.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.jadwal.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times-circle mr-1"></i> Batal
                             </a>
                         </div>

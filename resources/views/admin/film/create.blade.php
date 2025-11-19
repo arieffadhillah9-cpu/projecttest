@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <h3 class="card-title text-white">Form Film Baru</h3>
                     </div>
-                    <form action="{{ route('film.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.film.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
                         <div class="card-body">
@@ -127,7 +127,7 @@
                         
                         <div class="card-footer">
                             <button type="submit" class="btn btn-danger">Simpan Film</button>
-                            <a href="{{ route('film.index') }}" class="btn btn-default float-right">Batal</a>
+                            <a href="{{ route('admin.film.index') }}" class="btn btn-default float-right">Batal</a>
                         </div>
                     </form>
                 </div>

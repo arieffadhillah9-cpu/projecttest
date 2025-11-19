@@ -6,7 +6,7 @@
     <div class="container d-flex justify-content-between align-items-center">
         <h1 class="display-4 font-weight-bold">Daftar Film Bioskop</h1>
         {{-- Tombol untuk membuat film baru --}}
-        <a href="{{ route('film.create') }}" class="btn btn-primary btn-lg">
+        <a href="{{ route('admin.film.create') }}" class="btn btn-primary btn-lg">
             <i class="fas fa-plus"></i> Tambah Film Baru
         </a>
     </div>
@@ -35,7 +35,7 @@
                         
                         {{-- DIV WRAPPER: KUNCI UNTUK RASIO POSTER 2:3 (Ganti height: 350px) --}}
                         <div style="position: relative; width: 100%; height: 0; padding-bottom: 150%;"> 
-                            <a href="{{ route('film.show', $film->id) }}" style="text-decoration: none;">
+                            <a href="{{ route('admin.film.show', $film->id) }}" style="text-decoration: none;">
                                 
                                 <img src="{{ $film->poster_path ? asset('storage/' . str_replace('storage/', '', $film->poster_path)) : asset('images/placeholder.jpg') }}" 
                                      alt="Poster {{ $film->judul }}" 
@@ -55,7 +55,7 @@
                             <p class="card-text text-sm mb-auto text-muted">{{ Str::limit($film->deskripsi, 50) }}</p>
                             
                             <div class="mt-3">
-                                <a href="{{ route('film.show', $film->id) }}" class="btn btn-info btn-block btn-sm">
+                                <a href="{{ route('admin.film.show', $film->id) }}" class="btn btn-info btn-block btn-sm">
                                     Lihat Detail
                                 </a>
                             </div>

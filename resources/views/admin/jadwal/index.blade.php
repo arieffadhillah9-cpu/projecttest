@@ -23,7 +23,7 @@
                         </div>
 
                         {{-- Tombol Tambah Jadwal --}}
-                        <a href="{{ route('jadwal.create') }}"
+                        <a href="{{ route('admin.jadwal.create') }}"
                             class="btn btn-danger d-flex align-items-center mt-3 mt-md-0 px-3"
                             style="white-space: nowrap; height: 40px;">
                             <i class="fas fa-plus mr-1"></i> Tambah Jadwal Baru
@@ -112,12 +112,12 @@
                                         </td>
 
                                         <td>
-                                            <a href="{{ route('jadwal.edit', $jadwal->id) }}"
+                                            <a href="{{ route('admin.jadwal.edit', $jadwal->id) }}"
                                                 class="btn btn-sm btn-warning mr-2">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
 
-                                            <form action="{{ route('jadwal.destroy', $jadwal->id) }}" method="POST" style="display:inline-block;">
+                                            <form action="{{ route('admin.jadwal.destroy', $jadwal->id) }}" method="POST" style="display:inline-block;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus jadwal tayang untuk film {{ $jadwal->film->judul }} pada studio {{ $jadwal->studio->nama }}?')">
