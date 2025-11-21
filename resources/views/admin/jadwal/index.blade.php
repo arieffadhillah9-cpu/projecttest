@@ -3,7 +3,7 @@
 @section('content')
 
 {{-- Wrapper konten --}}
-<div class="content-wrapper bg-black text-white pt-5" style="min-height: 80vh;">
+<div class="content-wrapper bg-black text-white pt-5" style="min-height: 90vh;">
     <div class="container">
 
         {{-- =======================

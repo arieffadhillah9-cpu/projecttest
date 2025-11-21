@@ -73,3 +73,10 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 // --- 4. Rute Khusus User (Transaksi) ---
 // Route ini tetap di luar grup admin agar dapat diakses oleh fitur transaksi user
 Route::post('pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

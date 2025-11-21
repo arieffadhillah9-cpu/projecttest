@@ -4,7 +4,7 @@
 @section('content')
 
 {{-- Bagian Jumbotron Hitam (Opsional, untuk konsistensi header) --}}
-<div class="jumbotron jumbotron-fluid text-white" style="background-color: #1a1a1a; padding: 50px 0; margin-bottom: 0;">
+<div class="jumbotron jumbotron-fluid text-white" style="background-color: #000000ff; padding: 50px 0; margin-bottom: 0;">
     <div class="container text-center">
         <h1 class="display-4 font-weight-bold">Detail Film: {{ $film->judul }}</h1>
     </div>
@@ -65,7 +65,7 @@
                 <a href="{{ route('admin.film.edit', $film->id) }}" class="btn btn-warning mr-2">Edit Film</a>
                 
                 {{-- Form untuk Hapus --}}
-                <form action="{{ route(admin.film.destroy', $film->id) }}" method="POST" style="display:inline;">
+                <form action="{{ route('admin.film.destroy', $film->id) }}" method="POST" style="display:inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus film ini?')">Hapus Film</button>

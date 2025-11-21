@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider; // Wajib: Import RouteServiceProvider
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request; // Import kelas Request
 
 class LoginController extends Controller
 {
@@ -12,6 +12,11 @@ class LoginController extends Controller
     |--------------------------------------------------------------------------
     | Login Controller
     |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
     */
 
     use AuthenticatesUsers;
@@ -19,12 +24,23 @@ class LoginController extends Controller
     /**
      * Where to redirect users after login.
      *
-     * Kami mengubahnya dari '/home' menjadi konstanta RouteServiceProvider::HOME,
-     * yang sudah Anda set ke '/admin/dashboard'.
-     *
      * @var string
+     *
+     * PERBAIKAN: Diarahkan ke path Dashboard Admin yang baru.
+     * Path ini harus sesuai dengan gabungan prefix ('admin') dan route ('/dashboardmin').
      */
-    protected $redirectTo = RouteServiceProvider::HOME; 
+    protected $redirectTo = '/admin/dashboardmin'; 
+
+    /**
+     * Handle a successful logout.
+     * Metode ini akan menimpa metode default dari trait AuthenticatesUsers.
+     * Tujuannya: Memastikan pengguna diarahkan ke halaman login.
+     */
+    protected function loggedOut(Request $request)
+    {
+        // Mengarahkan pengguna langsung ke route 'login'
+        return redirect()->route('login');
+    }
 
     /**
      * Create a new controller instance.
