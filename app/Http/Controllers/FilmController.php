@@ -44,21 +44,23 @@ class FilmController extends Controller
             'is_tayang' => 'nullable|boolean',
         ]);
         
+        // 2. Proses Upload Gambar (Perbaikan: Hanya simpan path relatif)
         if ($request->hasFile('poster_path')) {
             // Simpan file ke direktori 'posters' menggunakan disk 'public'.
+            // $uploadedPath akan berisi path relatif, contoh: posters/namafileunik.jpg
             $uploadedPath = $request->file('poster_path')->store('posters', 'public');
             
-            // Simpan jalur dengan awalan 'storage/'
-            $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
+            // [PERBAIKAN KRUSIAL] HANYA simpan path relatif ke database. 
+            // Jangan tambahkan 'storage/' di sini, karena 'asset('storage/')' di view sudah menambahkannya.
+            $validatedData['poster_path'] = $uploadedPath; 
         }
 
         // 3. Simpan ke Database
         Film::create($validatedData);
 
         // 4. Redirect dan Tampilkan Pesan Sukses
-        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
         return redirect()->route('admin.film.index')
-                         ->with('success', 'Film baru berhasil ditambahkan!');
+                             ->with('success', 'Film baru berhasil ditambahkan!');
     }
     
     /**
@@ -92,26 +94,31 @@ class FilmController extends Controller
             'sutradara' => 'nullable|string|max:100',
             'genre' => 'required|string|max:100',
             'tanggal_rilis' => 'required|date',
-            'poster_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            // Gunakan 'sometimes' agar validasi gambar hanya berjalan jika ada file baru
+            'poster_path' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
             'is_tayang' => 'nullable|boolean',
         ]);
         
         // 2. Proses Upload Gambar (untuk update)
         if ($request->hasFile('poster_path')) {
             
-            // Hapus gambar lama (jika ada)
+            // Hapus gambar lama (jika ada) dari disk 'public'
             if ($film->poster_path) {
-                // Konversi path yang tersimpan (storage/posters/...) ke format storage (public/posters/...) untuk penghapusan
-                $oldPath = str_replace('storage/', 'public/', $film->poster_path);
-                Storage::delete($oldPath); 
+                // Perbaikan: Hapus file menggunakan path yang tersimpan di DB
+                Storage::disk('public')->delete($film->poster_path);
             }
 
             // Simpan gambar baru
             $uploadedPath = $request->file('poster_path')->store('posters', 'public');
-            $validatedData['poster_path'] = 'storage/' . $uploadedPath; 
+            // [PERBAIKAN KRUSIAL] HANYA simpan path relatif
+            $validatedData['poster_path'] = $uploadedPath; 
         } else {
-            // Jika tidak ada file baru, hapus 'poster_path' dari validatedData agar path lama tidak ditimpa oleh NULL.
-            unset($validatedData['poster_path']);
+            // Jika tidak ada file baru, hapus 'poster_path' dari validatedData 
+            // agar path lama tidak ditimpa oleh NULL (jika kolom di DB nullable).
+            // Namun karena kita hanya menyimpan path jika ada, ini sebenarnya tidak perlu,
+            // tapi memastikan is_tayang atau data lain tetap terupdate.
+            // Untuk amannya, kita memastikan poster_path tidak ada di validatedData jika tidak ada file baru.
+            // Karena kita menggunakan array $validatedData, ini sudah ditangani (jika tidak ada file baru, 'poster_path' tidak ada).
         }
 
 
@@ -119,9 +126,8 @@ class FilmController extends Controller
         $film->update($validatedData);
 
         // 4. Redirect ke halaman index dengan pesan sukses
-        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
         return redirect()->route('admin.film.index')
-                         ->with('success', 'Film berhasil diupdate!');
+                             ->with('success', 'Film berhasil diupdate!');
     }
     
     /**
@@ -131,19 +137,17 @@ class FilmController extends Controller
     {
         // 1. Hapus gambar terkait dari storage
         if ($film->poster_path) {
-            $oldPath = str_replace('storage/', 'public/', $film->poster_path);
-            Storage::delete($oldPath); 
+            // Perbaikan: Hapus langsung menggunakan Storage::disk('public')
+            Storage::disk('public')->delete($film->poster_path);
         }
         
         // 2. Hapus data dari database
         if ($film->delete()) {
-            // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
             return redirect()->route('admin.film.index')
                              ->with('success', 'Film berhasil dihapus.');
         }
 
-        // [PERUBAHAN] Mengarahkan ke rute 'admin.film.index'
         return redirect()->route('admin.film.index')
-                         ->with('error', 'Gagal menghapus film.');
+                             ->with('error', 'Gagal menghapus film.');
     }
 }
