@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Storage;
 class JadwalTayangController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (Admin View).
      */
     public function index()
     {
         // Ambil semua jadwal tayang, urutkan berdasarkan tanggal dan jam
         $jadwalTayangs = JadwalTayang::with(['film', 'studio'])
-                                    ->orderBy('tanggal', 'asc')
-                                    ->orderBy('jam_mulai', 'asc')
-                                    ->paginate(10); 
+                                     ->orderBy('tanggal', 'asc')
+                                     ->orderBy('jam_mulai', 'asc')
+                                     ->paginate(10); 
 
         return view('admin.jadwal.index', compact('jadwalTayangs'));
     }
@@ -72,25 +72,25 @@ class JadwalTayangController extends Controller
         return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang baru berhasil ditambahkan!');
     }
-      
+     
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(JadwalTayang $jadwal)
-{
-    $studios = Studio::all();
-    $films = Film::where('is_tayang', 1)
-                 ->orWhere('id', $jadwal->film_id)
-                 ->orderBy('judul')
-                 ->get();
+    {
+        $studios = Studio::all();
+        $films = Film::where('is_tayang', 1)
+                     ->orWhere('id', $jadwal->film_id)
+                     ->orderBy('judul')
+                     ->get();
 
-    return view('admin.jadwal.edit', [
-        'jadwalTayang' => $jadwal, // boleh alias di sini
-        'films' => $films,
-        'studios' => $studios,
-    ]);
-}
+        return view('admin.jadwal.edit', [
+            'jadwalTayang' => $jadwal, // boleh alias di sini
+            'films' => $films,
+            'studios' => $studios,
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -144,4 +144,39 @@ class JadwalTayangController extends Controller
             'harga' => 'required|integer|min:10000',
         ]);
     }
+
+    // --- FUNGSI BARU UNTUK USER FRONTEND ---
+    /**
+     * Mengambil dan menampilkan jadwal tayang yang tersedia untuk film tertentu.
+     * @param int $filmId ID dari Film
+     * @return \Illuminate\View\View
+     */
+    public function getSchedulesForFilm($filmId)
+    {
+        // 1. Ambil semua jadwal yang valid untuk film ini, diurutkan
+        $jadwal_tayang = JadwalTayang::where('film_id', $filmId)
+                                     // Pastikan jadwal belum lewat (tanggal harus >= hari ini)
+                                     ->where('tanggal', '>=', now()->toDateString())
+                                     ->orderBy('tanggal')
+                                     ->orderBy('jam_mulai')
+                                     ->get();
+
+        // 2. Ambil tanggal-tanggal unik yang tersedia
+        // Menggunakan pluck('tanggal') karena nama kolomnya 'tanggal'
+        $availableDates = $jadwal_tayang->pluck('tanggal')->unique()->values();
+
+        // 3. Ambil detail film (opsional, tapi berguna untuk tampilan)
+        $film = Film::find($filmId);
+
+        // Pastikan film ditemukan dan ada jadwalnya
+        if (!$film) {
+             abort(404, 'Film tidak ditemukan.');
+        }
+        
+        // Mengirimkan data yang diperlukan ke view.
+        // Asumsi view ini dipanggil dari suatu route seperti: 
+        // Route::get('film/{film}/schedule', [JadwalTayangController::class, 'getSchedulesForFilm'])->name('film.schedule');
+        return view('booking_schedule', compact('jadwal_tayang', 'availableDates', 'film'));
+    }
+    // ----------------------------------------
 }

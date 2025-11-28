@@ -8,6 +8,9 @@ use App\Http\Controllers\JadwalTayangController;
 use App\Http\Controllers\PemesananController; 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController; 
+// [TAMBAHAN] Import HomepageController untuk tampilan User/Frontend
+use App\Http\Controllers\HomepageController; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -17,15 +20,20 @@ use App\Http\Controllers\DashboardController;
 
 // --- 1. Route Publik/Umum ---
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// [PERUBAHAN KRUSIAL] Route utama sekarang mengarah ke HomepageController@index
+// Ini akan menampilkan halaman utama (index.blade.php) dengan daftar film yang sedang tayang
+Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 
-// ROUTE DASHBOARD PUBLIK (INI YANG ANDA MAKSUD)
-Route::get('/dashboard', function () {
-    // Memanggil view 'resources/views/layout/dashboard.blade.php'
-    return view('layout.dashboard');
-});
+// [TAMBAHAN] ROUTE HALAMAN KONTAK
+// Route ini merespons permintaan GET ke URL /contacts
+// dan mengarahkan ke view 'resources/views/contacts.blade.php'
+Route::get('/contacts', function () {
+    return view('contacts'); 
+})->name('contacts');
+
+
+// ROUTE DASHBOARD PUBLIK (SUDAH DIARAHKAN KE CONTROLLER)
+Route::get('/dashboard', [HomeController::class, 'dashboardUser'])->name('dashboard.user');
 
 Route::get('/app', function () {
     // Memanggil view 'resources/views/layouts/app.blade.php'
@@ -48,24 +56,18 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 // SEMUA route di bawah ini sekarang harus dipanggil dengan awalan 'admin.'
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
-    // a. Dashboard Admin (Mengatasi ERROR: route('admin.dashboard') not defined)
-    // URL: /admin
-    // Name: admin.dashboard
+    // a. Dashboard Admin 
     Route::get('/dashboardmin', [DashboardController::class, 'index'])->name('dashboardmin'); 
 
-    // b. Resource Routes CRUD (Sekarang memiliki nama admin.film.index, admin.studio.index, dll.)
-    // URL: /admin/film, /admin/studio, /admin/jadwal
+    // b. Resource Routes CRUD (sudah benar, menggunakan FilmController untuk CRUD admin)
     Route::resource('film', FilmController::class);
     Route::resource('studio', StudioController::class);
     Route::resource('jadwal', JadwalTayangController::class);
 
     // c. Resource Pemesanan Khusus Admin (index, show, destroy)
-    // URL: /admin/pemesanan
     Route::resource('pemesanan', PemesananController::class)->only(['index', 'show', 'destroy']);
 
     // d. Rute Khusus Update Status (admin)
-    // URL: PUT /admin/pemesanan/{pemesanan}/status
-    // Name: admin.pemesanan.update.status
     Route::put('pemesanan/{pemesanan}/status', [PemesananController::class, 'updateStatus'])->name('pemesanan.update.status');
 });
 
