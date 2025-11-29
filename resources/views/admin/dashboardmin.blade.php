@@ -19,6 +19,7 @@
                         <li><a href="{{ route('admin.film.index') }}" class="text-decoration-none">Kelola Film</a></li>
                         <li><a href="{{ route('admin.studio.index') }}" class="text-decoration-none">Kelola Studio</a></li>
                         <li><a href="{{ route('admin.jadwal.index') }}" class="text-decoration-none">Kelola Jadwal Tayang</a></li>
+                        <li><a href="{{ route('admin.pemesanan.index') }}" class="text-decoration-none">Kelola Pemesanan</a></li>
                     </ul>
                 </div>
             </div>

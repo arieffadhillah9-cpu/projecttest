@@ -1,4 +1,4 @@
-@extends('admin.pemesanan.pemesananapp')
+@extends('admin.layout.adminapp')
 
 @section('content')
     <div class="container py-5">

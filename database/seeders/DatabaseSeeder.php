@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User; // Pastikan ini ada di atas
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash; // Tambahkan ini
+use Illuminate\Support\Facades\Hash;
+use Database\Seeders\StudioSeeder; // Tambahkan import untuk StudioSeeder
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Membuat akun admin yang kredensialnya sudah Anda ketahui
+        // 1. Membuat akun admin
         User::create([
             'name' => 'Admin Test',
             'email' => 'admin@test.com', // <-- Email yang digunakan untuk login
@@ -22,6 +23,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Membuat 10 user acak lainnya untuk data dummy (Opsional)
-       
+        // User::factory(10)->create(); 
+        
+        // 3. Panggil Seeder untuk data STUDIO
+        $this->call(StudioSeeder::class); 
+        $this->call(FilmSeeder::class);
+        $this->call(JadwalTayangSeeder::class);
+        
+        // Panggil seeder lain di sini (FilmSeeder, JadwalTayangSeeder, dll.)
     }
 }

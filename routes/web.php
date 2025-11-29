@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\JadwalTayangController;
 use App\Http\Controllers\PemesananController; 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\DashboardController; 
+use App\Http\Controllers\HomeController; // Dipakai untuk Dashboard Publik
+use App\Http\Controllers\DashboardController; // Dipakai untuk Dashboard Admin
 
 /*
 |--------------------------------------------------------------------------
@@ -21,11 +22,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ROUTE DASHBOARD PUBLIK (INI YANG ANDA MAKSUD)
-Route::get('/dashboard', function () {
-    // Memanggil view 'resources/views/layout/dashboard.blade.php'
-    return view('layout.dashboard');
-});
+// ROUTE DASHBOARD PUBLIK
+// URL: /dashboard
+// Name: dashboard.public (Saya beri nama agar bisa dipanggil nanti)
+Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard.public');
 
 Route::get('/app', function () {
     // Memanggil view 'resources/views/layouts/app.blade.php'
@@ -36,6 +36,10 @@ Route::get('/app', function () {
 // Route CRUD Task (Publik/Umum)
 Route::resource('tasks', TaskController::class); 
 
+// Halaman Pemilihan Kursi (Membutuhkan Auth)
+// URL: /pesan/kursi/{jadwal}
+Route::get('/pesan/kursi/{jadwal}', [PemesananController::class, 'seatPicker'])->middleware('auth')->name('pemesanan.seatpicker');
+
 
 // --- 2. Route Otentikasi Laravel UI ---
 Auth::routes();
@@ -45,31 +49,25 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
 // --- 3. Kelompok Route ADMIN (Prefix 'admin' dan Name 'admin.') ---
-// SEMUA route di bawah ini sekarang harus dipanggil dengan awalan 'admin.'
+
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
-    // a. Dashboard Admin (Mengatasi ERROR: route('admin.dashboard') not defined)
-    // URL: /admin
-    // Name: admin.dashboard
+    // a. Dashboard Admin (URL: /admin/dashboardmin, Name: admin.dashboardmin)
     Route::get('/dashboardmin', [DashboardController::class, 'index'])->name('dashboardmin'); 
 
-    // b. Resource Routes CRUD (Sekarang memiliki nama admin.film.index, admin.studio.index, dll.)
-    // URL: /admin/film, /admin/studio, /admin/jadwal
+    // b. Resource Routes CRUD 
     Route::resource('film', FilmController::class);
     Route::resource('studio', StudioController::class);
     Route::resource('jadwal', JadwalTayangController::class);
 
-    // c. Resource Pemesanan Khusus Admin (index, show, destroy)
-    // URL: /admin/pemesanan
+    // c. Resource Pemesanan Khusus Admin 
     Route::resource('pemesanan', PemesananController::class)->only(['index', 'show', 'destroy']);
 
     // d. Rute Khusus Update Status (admin)
-    // URL: PUT /admin/pemesanan/{pemesanan}/status
-    // Name: admin.pemesanan.update.status
     Route::put('pemesanan/{pemesanan}/status', [PemesananController::class, 'updateStatus'])->name('pemesanan.update.status');
 });
 
 
 // --- 4. Rute Khusus User (Transaksi) ---
-// Route ini tetap di luar grup admin agar dapat diakses oleh fitur transaksi user
+// Route ini tetap di luar grup admin
 Route::post('pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');

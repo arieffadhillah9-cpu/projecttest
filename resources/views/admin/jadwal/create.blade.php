@@ -35,7 +35,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route(admin.jadwal.store') }}" method="POST">
+                    <form action="{{ route('admin.jadwal.store') }}" method="POST">
                         @csrf
 
                         {{-- 1. PILIH FILM --}}
