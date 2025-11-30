@@ -7,8 +7,11 @@ use App\Http\Controllers\FilmController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\JadwalTayangController;
 use App\Http\Controllers\PemesananController; 
-use App\Http\Controllers\HomeController; // Dipakai untuk Dashboard Publik
-use App\Http\Controllers\DashboardController; // Dipakai untuk Dashboard Admin
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DashboardController; 
+// [TAMBAHAN] Import HomepageController untuk tampilan User/Frontend
+use App\Http\Controllers\HomepageController; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,14 +21,20 @@ use App\Http\Controllers\DashboardController; // Dipakai untuk Dashboard Admin
 
 // --- 1. Route Publik/Umum ---
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// [PERUBAHAN KRUSIAL] Route utama sekarang mengarah ke HomepageController@index
+// Ini akan menampilkan halaman utama (index.blade.php) dengan daftar film yang sedang tayang
+Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 
-// ROUTE DASHBOARD PUBLIK
-// URL: /dashboard
-// Name: dashboard.public (Saya beri nama agar bisa dipanggil nanti)
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard.public');
+// [TAMBAHAN] ROUTE HALAMAN KONTAK
+// Route ini merespons permintaan GET ke URL /contacts
+// dan mengarahkan ke view 'resources/views/contacts.blade.php'
+Route::get('/contacts', function () {
+    return view('contacts'); 
+})->name('contacts');
+
+
+// ROUTE DASHBOARD PUBLIK (SUDAH DIARAHKAN KE CONTROLLER)
+Route::get('/dashboard', [HomeController::class, 'dashboardUser'])->name('dashboard.user');
 
 Route::get('/app', function () {
     // Memanggil view 'resources/views/layouts/app.blade.php'
@@ -52,15 +61,15 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
-    // a. Dashboard Admin (URL: /admin/dashboardmin, Name: admin.dashboardmin)
+    // a. Dashboard Admin 
     Route::get('/dashboardmin', [DashboardController::class, 'index'])->name('dashboardmin'); 
 
-    // b. Resource Routes CRUD 
+    // b. Resource Routes CRUD (sudah benar, menggunakan FilmController untuk CRUD admin)
     Route::resource('film', FilmController::class);
     Route::resource('studio', StudioController::class);
     Route::resource('jadwal', JadwalTayangController::class);
 
-    // c. Resource Pemesanan Khusus Admin 
+    // c. Resource Pemesanan Khusus Admin (index, show, destroy)
     Route::resource('pemesanan', PemesananController::class)->only(['index', 'show', 'destroy']);
 
     // d. Rute Khusus Update Status (admin)

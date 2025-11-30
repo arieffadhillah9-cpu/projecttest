@@ -3,7 +3,7 @@
 @section('content')
 
 {{-- content-wrapper diatur ke bg-black dan min-height agar konten terlihat rapi --}}
-<div class="content-wrapper bg-black text-white pt-5" style="min-height: 80vh;">
+<div class="content-wrapper bg-black text-white pt-5" style="min-height: 90vh;">
     <div class="container"> 
         
         {{-- START: KONTROL JUDUL DAN TOMBOL --}}

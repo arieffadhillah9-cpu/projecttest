@@ -8,11 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Film extends Model
 {
     use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     * @var array<int, string>
-     */
+    
+    // Pastikan is_tayang, durasi_menit, dan poster_path ada di $fillable
     protected $fillable = [
         'judul',
         'deskripsi',
@@ -21,14 +18,12 @@ class Film extends Model
         'genre',
         'tanggal_rilis',
         'poster_path',
-        'is_tayang', // Tambahkan semua kolom yang Anda gunakan
+        'is_tayang', // Penting untuk filter di HomepageController
     ];
 
-    // Tambahkan relasi di sini (seperti yang kita bahas sebelumnya)
-     public function jadwalTayangs()
-    {
-        // Pastikan nama method ini diubah menjadi plural (jadwalTayangs)
-        // dan mengarah ke Model JadwalTayang.
-        return $this->hasMany(JadwalTayang::class);
-    }
+    // Casting untuk is_tayang agar selalu diperlakukan sebagai boolean
+    protected $casts = [
+        'is_tayang' => 'boolean',
+        'tanggal_rilis' => 'date',
+    ];
 }
