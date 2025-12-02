@@ -11,14 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Jika tabel detail_pemesanan sudah terlanjur dibuat, Anda perlu menjalankan `php artisan migrate:rollback`
+        // lalu hapus migrasi lama dan ganti dengan kode ini, atau buat migrasi baru untuk menambahkan kolom.
+        
         Schema::create('detail_pemesanan', function (Blueprint $table) {
             $table->id();
+            
+            // Kolom pemesanan_id (relasi ke transaksi utama)
             $table->foreignId('pemesanan_id')->constrained('pemesanan')->onDelete('cascade');
+            
+            // Kolom JADWAL_ID (PENTING: untuk mengunci kursi pada jadwal tertentu)
+            $table->foreignId('jadwal_id')->constrained('jadwal_tayangs')->onDelete('cascade');
+
             $table->string('nomor_kursi'); // Contoh: A1, B10, dll.
             $table->timestamps();
 
-            // Mencegah dua pemesanan pada kursi yang sama dalam satu transaksi
-            $table->unique(['pemesanan_id', 'nomor_kursi']); 
+            // Unique Constraint Kritis: 
+            // Kombinasi jadwal_id dan nomor_kursi harus UNIK.
+            // Ini memastikan Kursi A1 pada Jadwal X tidak dapat dipesan dua kali,
+            // tidak peduli oleh transaksi mana (pemesanan_id).
+            $table->unique(['jadwal_id', 'nomor_kursi']); 
         });
     }
 

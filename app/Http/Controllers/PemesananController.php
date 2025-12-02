@@ -69,13 +69,16 @@ class PemesananController extends Controller
         
         DB::beginTransaction();
         try {
-            // Cek Ketersediaan Kursi (Penting!)
-            // Ambil semua kursi yang sudah dipesan untuk jadwal ini (status paid atau pending)
-            $occupiedSeats = DetailPemesanan::whereHas('pemesanan', function($query) use ($jadwalId) {
-                $query->where('jadwal_id', $jadwalId)
-                      ->whereIn('status', ['paid', 'pending']); // Kursi yang sedang dipesan atau sudah lunas
-            })->whereIn('nomor_kursi', $nomorKursi)
-              ->pluck('nomor_kursi')->toArray();
+            // Cek Ketersediaan Kursi (Penting & Disederhanakan berdasarkan Model DetailPemesanan baru)
+            
+            // Kueri yang lebih efisien karena menggunakan jadwal_id yang ada di DetailPemesanan
+            $occupiedSeats = DetailPemesanan::where('jadwal_id', $jadwalId) // Menggunakan jadwal_id di tabel DetailPemesanan
+                ->whereIn('nomor_kursi', $nomorKursi)
+                // Filter status dari Pemesanan terkait
+                ->whereHas('pemesanan', function($query) {
+                    $query->whereIn('status', ['paid', 'pending']); 
+                })
+                ->pluck('nomor_kursi')->toArray();
 
             if (!empty($occupiedSeats)) {
                 DB::rollBack();
@@ -89,7 +92,8 @@ class PemesananController extends Controller
                 'user_id' => $userId,
                 'jadwal_id' => $jadwalId,
                 // Pastikan kolom harga di tabel JadwalTayang sudah ada
-                'kode_pemesanan' => 'TKT-' . date('Ymd') . '-' . time() . '-' . rand(100, 999), 
+                // Membuat kode pemesanan lebih sederhana, hindari time() jika tidak perlu
+                'kode_pemesanan' => 'TKT-' . date('Ymd') . '-' . uniqid(), 
                 'jumlah_tiket' => $jumlahTiket,
                 'total_harga' => $totalHarga,
                 'status' => 'pending', 
@@ -101,6 +105,7 @@ class PemesananController extends Controller
             foreach ($nomorKursi as $kursi) {
                 $details[] = [
                     'pemesanan_id' => $pemesanan->id,
+                    'jadwal_id' => $jadwalId, // KRITIS: Menyimpan jadwal_id di sini
                     'nomor_kursi' => $kursi,
                     'created_at' => now(), 
                     'updated_at' => now(), 
@@ -120,7 +125,12 @@ class PemesananController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            \Log::error('Gagal membuat pemesanan: ' . $e->getMessage());
+            // Log::error digunakan untuk menyimpan pesan error ke log Laravel
+            \Log::error('Gagal membuat pemesanan: ' . $e->getMessage()); 
+            // Tambahkan pengecekan jika errornya adalah Unique Constraint Violation
+            if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'Integrity constraint violation')) {
+                 return response()->json(['error' => 'Kursi yang Anda pilih baru saja dipesan oleh pengguna lain. Silakan coba kursi lain.'], 409);
+            }
             return response()->json(['error' => 'Terjadi kesalahan sistem saat memproses pemesanan.'], 500);
         }
     }
@@ -132,9 +142,39 @@ class PemesananController extends Controller
     {
         try {
             $pemesanan->delete();
-            return redirect()->route('pemesanan.index')->with('success', 'Pemesanan berhasil dihapus.');
+            return redirect()->route('admin.pemesanan.index')->with('success', 'Pemesanan berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()->route('pemesanan.index')->with('error', 'Gagal menghapus pemesanan. Terjadi kesalahan.');
+            return redirect()->route('admin.pemesanan.index')->with('error', 'Gagal menghapus pemesanan. Terjadi kesalahan.');
+        }
+    }
+    
+    /**
+     * ADMIN: Update status pemesanan (e.g., dari pending ke paid, atau cancel).
+     * @param Request $request
+     * @param Pemesanan $pemesanan
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateStatus(Request $request, Pemesanan $pemesanan)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,paid,expired,canceled',
+        ]);
+
+        try {
+            $statusBaru = $request->input('status');
+            $dataUpdate = ['status' => $statusBaru];
+
+            // Jika status menjadi paid, catat waktu pembayarannya
+            if ($statusBaru === 'paid') {
+                $dataUpdate['waktu_pembayaran'] = now();
+            }
+
+            $pemesanan->update($dataUpdate);
+
+            return redirect()->route('admin.pemesanan.show', $pemesanan)->with('success', "Status pemesanan #{$pemesanan->kode_pemesanan} berhasil diperbarui menjadi {$statusBaru}.");
+        } catch (\Exception $e) {
+            \Log::error('Gagal update status pemesanan: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memperbarui status pemesanan. Terjadi kesalahan sistem.');
         }
     }
 }

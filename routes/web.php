@@ -8,9 +8,8 @@ use App\Http\Controllers\JadwalTayangController;
 use App\Http\Controllers\PemesananController; 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController; 
-// [TAMBAHAN] Import HomepageController untuk tampilan User/Frontend
 use App\Http\Controllers\HomepageController; 
-
+use App\Http\Controllers\UserProfileController; // BARU: Untuk halaman riwayat user
 
 /*
 |--------------------------------------------------------------------------
@@ -20,19 +19,15 @@ use App\Http\Controllers\HomepageController;
 
 // --- 1. Route Publik/Umum ---
 
-// [PERUBAHAN KRUSIAL] Route utama sekarang mengarah ke HomepageController@index
-// Ini akan menampilkan halaman utama (index.blade.php) dengan daftar film yang sedang tayang
+// Route utama sekarang mengarah ke HomepageController@index
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 
-// [TAMBAHAN] ROUTE HALAMAN KONTAK
-// Route ini merespons permintaan GET ke URL /contacts
-// dan mengarahkan ke view 'resources/views/contacts.blade.php'
+// Route Halaman Kontak
 Route::get('/contacts', function () {
     return view('contacts'); 
 })->name('contacts');
 
-
-// ROUTE DASHBOARD PUBLIK (SUDAH DIARAHKAN KE CONTROLLER)
+// ROUTE DASHBOARD PUBLIK
 Route::get('/dashboard', [HomeController::class, 'dashboardUser'])->name('dashboard.user');
 
 Route::get('/app', function () {
@@ -40,10 +35,8 @@ Route::get('/app', function () {
     return view('layout.app');
 });
 
-
 // Route CRUD Task (Publik/Umum)
 Route::resource('tasks', TaskController::class); 
-
 
 // --- 2. Route Otentikasi Laravel UI ---
 Auth::routes();
@@ -53,13 +46,12 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
 // --- 3. Kelompok Route ADMIN (Prefix 'admin' dan Name 'admin.') ---
-// SEMUA route di bawah ini sekarang harus dipanggil dengan awalan 'admin.'
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
     // a. Dashboard Admin 
     Route::get('/dashboardmin', [DashboardController::class, 'index'])->name('dashboardmin'); 
 
-    // b. Resource Routes CRUD (sudah benar, menggunakan FilmController untuk CRUD admin)
+    // b. Resource Routes CRUD 
     Route::resource('film', FilmController::class);
     Route::resource('studio', StudioController::class);
     Route::resource('jadwal', JadwalTayangController::class);
@@ -72,6 +64,15 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 });
 
 
-// --- 4. Rute Khusus User (Transaksi) ---
-// Route ini tetap di luar grup admin agar dapat diakses oleh fitur transaksi user
-Route::post('pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
+// --- 4. Rute Khusus User (Transaksi & Profil) ---
+Route::middleware('auth')->group(function () {
+    // Route Pemesanan (Hanya POST store yang perlu di luar admin)
+    Route::post('pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
+
+    // BARU: Riwayat Pemesanan User
+    // Asumsi Anda akan membuat controller dan view untuk melihat riwayat
+    Route::get('/user/history', [UserProfileController::class, 'history'])
+    ->name('user.history');
+Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
+    ->name('user.pemesanan.show');
+});
