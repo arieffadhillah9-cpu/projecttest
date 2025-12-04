@@ -12,13 +12,18 @@ class DetailPemesanan extends Model
     protected $table = 'detail_pemesanan';
 
     protected $fillable = [
-        'pemesanan_id',
-        'nomor_kursi',
-    ];
+    'pemesanan_id',
+    'jadwal_id',
+    'nomor_kursi',
+];
 
     // Relasi ke Pemesanan
     public function pemesanan()
     {
         return $this->belongsTo(Pemesanan::class);
+    }
+    public function jadwal()
+    {
+    return $this->belongsTo(JadwalTayang::class, 'jadwal_id');
     }
 }

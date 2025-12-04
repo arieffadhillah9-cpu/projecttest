@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pemesanan;
 use App\Models\DetailPemesanan;
-use App\Models\JadwalTayang; // Pastikan model JadwalTayang sudah ada
+use App\Models\JadwalTayang; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -38,43 +38,78 @@ class PemesananController extends Controller
         // Mengarah ke resources/views/admin/pemesanan/show.blade.php
         return view('admin.pemesanan.show', compact('pemesanan'));
     }
+    
+    // --- START: FUNGSI BARU UNTUK USER: PEMILIHAN KURSI ---
 
     /**
-     * USER: Proses penyimpanan (transaksi) Pemesanan baru.
-     * Ini adalah logika inti pembelian tiket.
+     * USER: Menampilkan formulir pemilihan kursi untuk jadwal tertentu.
+     * Digunakan sebagai step 1 sebelum POST ke processPemesanan.
+     * @param int $jadwalId
+     * @return \Illuminate\View\View
      */
-    public function store(Request $request)
+    public function selectSeat($jadwalId)
+    {
+        $jadwal = JadwalTayang::with(['film', 'studio'])->findOrFail($jadwalId);
+        $studio = $jadwal->studio;
+
+        // Mendapatkan daftar kursi yang sudah terisi untuk jadwal ini
+        // Status 'paid' dan 'pending' dianggap sudah terisi/dipesan
+        $kursiTerisi = DetailPemesanan::whereHas('pemesanan', function ($query) use ($jadwalId) {
+            // Pengecekan 'jadwal_id' dilakukan pada tabel Pemesanan (induk)
+            $query->where('jadwal_id', $jadwalId);
+            $query->whereIn('status', ['paid', 'pending']); 
+        })->pluck('nomor_kursi')->toArray();
+
+        // Mengirim data ke view seat_selection
+        // Asumsi: Studio memiliki kolom jumlah_baris dan jumlah_kolom
+        $rowCount = $studio->jumlah_baris_kursi ?? 5; // Default jika kolom tidak ada
+        $columnCount = $studio->jumlah_kolom_kursi ?? 10; // Default jika kolom tidak ada
+        
+        return view('user.pemesanan.seat_selection', compact('jadwal', 'studio', 'kursiTerisi', 'rowCount', 'columnCount'));
+    }
+
+    
+    /**
+     * USER: Memproses pemesanan tiket dari pemilihan kursi (Step 2).
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function processPemesanan(Request $request)
     {
         // 1. Validasi Input
         $request->validate([
-            'jadwal_id' => 'required|exists:jadwal_tayang,id',
-            'nomor_kursi' => 'required|array|min:1',
-            'nomor_kursi.*' => 'required|string|max:5', 
+            'jadwal_id' => 'required|exists:jadwal_tayangs,id',
+            // Nama input diubah menjadi 'kode_kursi' agar sesuai dengan revisi View
+            'kode_kursi' => 'required|string', 
         ]);
-
-        $userId = Auth::id(); 
         
+        $userId = Auth::id(); 
         if (!$userId) {
-            return response()->json(['error' => 'Anda harus login untuk membuat pemesanan.'], 401);
+            // Seharusnya middleware('auth') sudah menangani ini, tapi baik untuk pengecekan
+            return redirect()->route('login')->with('error', 'Anda harus login untuk melanjutkan pemesanan.');
         }
 
         $jadwalId = $request->input('jadwal_id');
-        $nomorKursi = $request->input('nomor_kursi');
-        $jumlahTiket = count($nomorKursi);
+        // Konversi string kursi (A1,B3,C5) menjadi array
+        $selectedSeats = array_filter(explode(',', $request->input('kode_kursi'))); 
         
-        // Ambil Jadwal Tayang untuk mendapatkan harga tiket
+        if (empty($selectedSeats)) {
+            return redirect()->back()->with('error', 'Anda harus memilih minimal satu kursi.')->withInput();
+        }
+
         $jadwal = JadwalTayang::findOrFail($jadwalId);
-        $hargaPerTiket = $jadwal->harga; // Asumsi kolom harga ada di tabel jadwal_tayang
+        $jumlahTiket = count($selectedSeats);
+        
+        // Menggunakan $jadwal->harga
+        $hargaPerTiket = $jadwal->harga; 
+        
         $totalHarga = $jumlahTiket * $hargaPerTiket;
         
         DB::beginTransaction();
         try {
-            // Cek Ketersediaan Kursi (Penting & Disederhanakan berdasarkan Model DetailPemesanan baru)
-            
-            // Kueri yang lebih efisien karena menggunakan jadwal_id yang ada di DetailPemesanan
-            $occupiedSeats = DetailPemesanan::where('jadwal_id', $jadwalId) // Menggunakan jadwal_id di tabel DetailPemesanan
-                ->whereIn('nomor_kursi', $nomorKursi)
-                // Filter status dari Pemesanan terkait
+            // Cek Ketersediaan Kursi (Penting untuk mencegah double booking)
+            $occupiedSeats = DetailPemesanan::where('jadwal_id', $jadwalId)
+                ->whereIn('nomor_kursi', $selectedSeats)
                 ->whereHas('pemesanan', function($query) {
                     $query->whereIn('status', ['paid', 'pending']); 
                 })
@@ -82,18 +117,16 @@ class PemesananController extends Controller
 
             if (!empty($occupiedSeats)) {
                 DB::rollBack();
-                return response()->json([
-                    'error' => 'Kursi berikut sudah dipesan atau dalam proses pembayaran: ' . implode(', ', $occupiedSeats)
-                ], 409); // Conflict
+                $seatsList = implode(', ', $occupiedSeats);
+                return redirect()->back()->with('error', "Kursi berikut sudah terisi: {$seatsList}. Silakan pilih kursi lain.")->withInput();
             }
 
             // 2. Buat Pemesanan (HEADER/RINGKASAN)
             $pemesanan = Pemesanan::create([
                 'user_id' => $userId,
                 'jadwal_id' => $jadwalId,
-                // Pastikan kolom harga di tabel JadwalTayang sudah ada
-                // Membuat kode pemesanan lebih sederhana, hindari time() jika tidak perlu
-                'kode_pemesanan' => 'TKT-' . date('Ymd') . '-' . uniqid(), 
+                // Menggunakan random string yang lebih unik
+                'kode_pemesanan' => 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6)), 
                 'jumlah_tiket' => $jumlahTiket,
                 'total_harga' => $totalHarga,
                 'status' => 'pending', 
@@ -102,11 +135,13 @@ class PemesananController extends Controller
 
             // 3. Buat Detail Pemesanan (ITEM/KURSI)
             $details = [];
-            foreach ($nomorKursi as $kursi) {
+            foreach ($selectedSeats as $kursi) {
                 $details[] = [
                     'pemesanan_id' => $pemesanan->id,
-                    'jadwal_id' => $jadwalId, // KRITIS: Menyimpan jadwal_id di sini
+                    // Tambahkan jadwal_id di detail jika diperlukan untuk query cepat
+                    'jadwal_id' => $jadwalId, 
                     'nomor_kursi' => $kursi,
+                    'harga' => $hargaPerTiket, // Simpan harga saat ini di detail
                     'created_at' => now(), 
                     'updated_at' => now(), 
                 ];
@@ -116,25 +151,22 @@ class PemesananController extends Controller
             // 4. Commit Transaksi
             DB::commit();
 
-            return response()->json([
-                'success' => 'Pemesanan berhasil dibuat. Menunggu pembayaran.',
-                'pemesanan_id' => $pemesanan->id,
-                'kode_pemesanan' => $pemesanan->kode_pemesanan,
-                'total_harga' => $pemesanan->total_harga
-            ], 201); // Created
+            // Arahkan ke halaman detail pemesanan user untuk proses pembayaran
+            return redirect()->route('user.pemesanan.show', ['kode_pemesanan' => $pemesanan->kode_pemesanan])
+                             ->with('success', 'Pemesanan berhasil dibuat. Mohon selesaikan pembayaran.');
 
         } catch (Exception $e) {
             DB::rollBack();
-            // Log::error digunakan untuk menyimpan pesan error ke log Laravel
-            \Log::error('Gagal membuat pemesanan: ' . $e->getMessage()); 
-            // Tambahkan pengecekan jika errornya adalah Unique Constraint Violation
-            if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'Integrity constraint violation')) {
-                 return response()->json(['error' => 'Kursi yang Anda pilih baru saja dipesan oleh pengguna lain. Silakan coba kursi lain.'], 409);
-            }
-            return response()->json(['error' => 'Terjadi kesalahan sistem saat memproses pemesanan.'], 500);
+            \Log::error('Gagal memproses pemesanan: ' . $e->getMessage()); 
+            
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat memproses pemesanan. Silakan coba lagi.')->withInput();
         }
     }
+
+    // --- END: FUNGSI BARU UNTUK USER: PEMILIHAN KURSI ---
     
+    // Metode-metode lain...
+
     /**
      * ADMIN: Hapus pemesanan
      */

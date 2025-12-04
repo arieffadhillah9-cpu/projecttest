@@ -8,20 +8,17 @@ use Illuminate\Support\Facades\Hash; // Tambahkan ini
 
 class DatabaseSeeder extends Seeder
 {
-    
     /**
      * Seed the application's database.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
-        // 1. Membuat akun admin yang kredensialnya sudah Anda ketahui
-        User::create([
-            'name' => 'Admin Test',
-            'email' => 'admin@test.com', // <-- Email yang digunakan untuk login
-            'password' => Hash::make('password123'), // <-- Password: password123
+        $this->call([
+            AdminSeeder::class, // Panggil Admin Seeder dulu
+            DataBioskopSeeder::class, // Panggil Data Bioskop Seeder
+            // Panggil Seeder lain yang mungkin Anda miliki
         ]);
-
-        // 2. Membuat 10 user acak lainnya untuk data dummy (Opsional)
-       
     }
 }

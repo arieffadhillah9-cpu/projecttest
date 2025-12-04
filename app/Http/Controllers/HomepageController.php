@@ -37,8 +37,8 @@ class HomepageController extends Controller
             return Carbon::parse($time)->format('H:i');
         });
 
-        // Mengarahkan ke view 'index.blade.php' (tampilan User)
-        return view('index', compact('films', 'availableDates', 'availableTimes'));
+        // Mengarahkan ke view 'layout/dashboard.blade.php' (tampilan User)
+        return view('layout.dashboard', compact('films', 'availableDates', 'availableTimes'));
     }
 
     /**

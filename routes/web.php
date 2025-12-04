@@ -9,7 +9,7 @@ use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController; 
 use App\Http\Controllers\HomepageController; 
-use App\Http\Controllers\UserProfileController; // BARU: Untuk halaman riwayat user
+use App\Http\Controllers\UserProfileController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +38,13 @@ Route::get('/app', function () {
 // Route CRUD Task (Publik/Umum)
 Route::resource('tasks', TaskController::class); 
 
+// **BARU/DITAMBAHKAN KEMBALI:** LANGKAH 1: Tampilkan Jadwal Tayang untuk Film yang dipilih
+// Route ini harus di luar 'middleware('auth')' agar user bisa melihat jadwal sebelum login.
+// Nama rute yang dicari oleh tombol "Pesan Ticket": 'film.schedule'
+Route::get('/film/{filmId}/schedule', [JadwalTayangController::class, 'getSchedulesForFilm'])
+    ->name('film.schedule'); 
+
+
 // --- 2. Route Otentikasi Laravel UI ---
 Auth::routes();
 
@@ -64,15 +71,27 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 });
 
 
-// --- 4. Rute Khusus User (Transaksi & Profil) ---
+// --- 4. Rute Khusus User (Transaksi & Profil) - WAJIB LOGIN ---
 Route::middleware('auth')->group(function () {
-    // Route Pemesanan (Hanya POST store yang perlu di luar admin)
-    Route::post('pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
+    
+    // A. Rute Pemesanan Tiket (Lanjutan)
+    
+    // LANGKAH 2: Tampilkan halaman pemilihan kursi (WAJIB LOGIN)
+    // URL: /user/pemesanan/{jadwalId}/select-seat
+    Route::get('/user/pemesanan/{jadwalId}/select-seat', [PemesananController::class, 'selectSeat'])
+        ->name('pemesanan.select_seat');
+    
+    // LANGKAH 3: Proses data kursi yang dipilih dan simpan transaksi (WAJIB LOGIN)
+    // URL: /user/pemesanan/process
+    Route::post('/user/pemesanan/process', [PemesananController::class, 'processPemesanan'])
+        ->name('pemesanan.process');
 
-    // BARU: Riwayat Pemesanan User
-    // Asumsi Anda akan membuat controller dan view untuk melihat riwayat
+    // B. Riwayat Pemesanan User
+    
     Route::get('/user/history', [UserProfileController::class, 'history'])
-    ->name('user.history');
-Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
-    ->name('user.pemesanan.show');
+        ->name('user.history');
+        
+    // Rute untuk melihat detail pemesanan (digunakan sebagai halaman checkout/pembayaran)
+    Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
+        ->name('user.pemesanan.show');
 });

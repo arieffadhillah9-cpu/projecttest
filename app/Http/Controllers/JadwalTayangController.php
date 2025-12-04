@@ -154,29 +154,24 @@ class JadwalTayangController extends Controller
     public function getSchedulesForFilm($filmId)
     {
         // 1. Ambil semua jadwal yang valid untuk film ini, diurutkan
-        $jadwal_tayang = JadwalTayang::where('film_id', $filmId)
-                                     // Pastikan jadwal belum lewat (tanggal harus >= hari ini)
+        $jadwal_tayang = JadwalTayang::with('studio') // Tambahkan eager loading untuk studio, ini penting
+                                     ->where('film_id', $filmId)
+                                     // Gunakan nama kolom 'tanggal' sesuai migrasi
+                                     // now() adalah helper Laravel yang aman digunakan di sini
                                      ->where('tanggal', '>=', now()->toDateString())
                                      ->orderBy('tanggal')
                                      ->orderBy('jam_mulai')
                                      ->get();
 
-        // 2. Ambil tanggal-tanggal unik yang tersedia
-        // Menggunakan pluck('tanggal') karena nama kolomnya 'tanggal'
+        // 2. Ambil detail film
+        $film = Film::findOrFail($filmId); // Gunakan findOrFail untuk 404 otomatis jika film tidak ada
+
+        // 3. Ambil tanggal-tanggal unik yang tersedia
+        // Gunakan nama kolom 'tanggal' sesuai migrasi
         $availableDates = $jadwal_tayang->pluck('tanggal')->unique()->values();
 
-        // 3. Ambil detail film (opsional, tapi berguna untuk tampilan)
-        $film = Film::find($filmId);
-
-        // Pastikan film ditemukan dan ada jadwalnya
-        if (!$film) {
-             abort(404, 'Film tidak ditemukan.');
-        }
-        
         // Mengirimkan data yang diperlukan ke view.
-        // Asumsi view ini dipanggil dari suatu route seperti: 
-        // Route::get('film/{film}/schedule', [JadwalTayangController::class, 'getSchedulesForFilm'])->name('film.schedule');
-        return view('booking_schedule', compact('jadwal_tayang', 'availableDates', 'film'));
+        return view('layout.booking_schedule', compact('jadwal_tayang', 'availableDates', 'film'));
     }
     // ----------------------------------------
 }
