@@ -10,6 +10,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <title>Seatly</title>
 
   @include('layout.partials.style')
+</head>
   
 <body class="hold-transition sidebar-collapse bg-dark">
   <div class="wrapper">

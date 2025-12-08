@@ -94,4 +94,5 @@ Route::middleware('auth')->group(function () {
     // Rute untuk melihat detail pemesanan (digunakan sebagai halaman checkout/pembayaran)
     Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
         ->name('user.pemesanan.show');
+        
 });

@@ -26,4 +26,9 @@ class Studio extends Model
     {
         return $this->hasMany(JadwalTayang::class);
     }
+    public function seats()
+    {
+    return $this->hasMany(Seat::class);
+    }
+
 }

@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class, // Panggil Admin Seeder dulu
             DataBioskopSeeder::class, // Panggil Data Bioskop Seeder
             // Panggil Seeder lain yang mungkin Anda miliki
+           SeatSeeder::class,
+
         ]);
     }
 }
