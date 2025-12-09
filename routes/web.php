@@ -79,12 +79,15 @@ Route::middleware('auth')->group(function () {
     // LANGKAH 2: Tampilkan halaman pemilihan kursi (WAJIB LOGIN)
     // URL: /user/pemesanan/{jadwalId}/select-seat
     Route::get('/user/pemesanan/{jadwalId}/select-seat', [PemesananController::class, 'selectSeat'])
-        ->name('pemesanan.select_seat');
-    
+        ->name('user.pemesanan.select_seat');
+        
+   
     // LANGKAH 3: Proses data kursi yang dipilih dan simpan transaksi (WAJIB LOGIN)
     // URL: /user/pemesanan/process
-    Route::post('/user/pemesanan/process', [PemesananController::class, 'processPemesanan'])
-        ->name('pemesanan.process');
+    
+ Route::post('/user/pemesanan/process', [PemesananController::class, 'processPemesanan'])
+        ->name('user.pemesanan.process');
+        
 
     // B. Riwayat Pemesanan User
     

@@ -7,6 +7,7 @@ use App\Models\Film;
 use App\Models\Studio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon; // <-- SOLUSI: Class Carbon harus di-import
 
 class JadwalTayangController extends Controller
 {
@@ -72,7 +73,7 @@ class JadwalTayangController extends Controller
         return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang baru berhasil ditambahkan!');
     }
-     
+      
 
     /**
      * Show the form for editing the specified resource.
@@ -151,27 +152,47 @@ class JadwalTayangController extends Controller
      * @param int $filmId ID dari Film
      * @return \Illuminate\View\View
      */
-    public function getSchedulesForFilm($filmId)
+     public function getSchedulesForFilm(string $filmId)
     {
-        // 1. Ambil semua jadwal yang valid untuk film ini, diurutkan
-        $jadwal_tayang = JadwalTayang::with('studio') // Tambahkan eager loading untuk studio, ini penting
-                                     ->where('film_id', $filmId)
-                                     // Gunakan nama kolom 'tanggal' sesuai migrasi
-                                     // now() adalah helper Laravel yang aman digunakan di sini
-                                     ->where('tanggal', '>=', now()->toDateString())
-                                     ->orderBy('tanggal')
-                                     ->orderBy('jam_mulai')
-                                     ->get();
+        // 1. Ambil semua Jadwal Tayang yang valid (termasuk relasi studio dan film)
+        $schedules = JadwalTayang::with(['studio', 'film'])
+            ->where('film_id', $filmId)
+            // Filter jadwal yang tanggalnya sama atau setelah hari ini
+            // Mengganti 'tanggal_tayang' menjadi 'tanggal' agar konsisten dengan field lain
+            ->where('tanggal', '>=', Carbon::today()->toDateString()) 
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
+        
+        // Cek apakah film ditemukan
+        $film = Film::find($filmId);
+        if (!$film) {
+            // Tangani jika film tidak ditemukan (misalnya redirect atau 404)
+            abort(404, 'Film tidak ditemukan.');
+        }
 
-        // 2. Ambil detail film
-        $film = Film::findOrFail($filmId); // Gunakan findOrFail untuk 404 otomatis jika film tidak ada
+        // 2. Ambil daftar tanggal unik yang tersedia
+        // Mengganti 'tanggal_tayang' menjadi 'tanggal'
+        $availableDates = $schedules->pluck('tanggal')->unique()->values()->all();
 
-        // 3. Ambil tanggal-tanggal unik yang tersedia
-        // Gunakan nama kolom 'tanggal' sesuai migrasi
-        $availableDates = $jadwal_tayang->pluck('tanggal')->unique()->values();
+        // 3. Persiapkan data jadwal lengkap dalam format yang mudah diolah JS (JSON)
+        $allSchedules = $schedules->map(function ($schedule) {
+            return [
+                'id' => $schedule->id,
+                'studio_id' => $schedule->studio_id,
+                'studio_nama' => $schedule->studio->nama,
+                // Mengambil nilai dari field 'tanggal'
+                'tanggal_tayang' => $schedule->tanggal, 
+                'jam_mulai' => $schedule->jam_mulai,
+                'harga' => $schedule->harga,
+                'film_id' => $schedule->film_id,
+            ];
+        })->groupBy('tanggal'); // Mengelompokkan berdasarkan field 'tanggal'
 
-        // Mengirimkan data yang diperlukan ke view.
-        return view('layout.booking_schedule', compact('jadwal_tayang', 'availableDates', 'film'));
+        return view('layout.booking_schedule', [
+            'film' => $film, // Data film
+            'availableDates' => $availableDates, // Daftar tanggal untuk tombol
+            'allSchedules' => $allSchedules, // Semua jadwal yang dikelompokkan (untuk JS)
+        ]);
     }
-    // ----------------------------------------
 }

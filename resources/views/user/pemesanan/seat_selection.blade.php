@@ -1,160 +1,167 @@
 @extends('layout.app')
 
 @section('content')
-<div class="container mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-        
-        <!-- Tombol Kembali -->
-        <a href="{{ url()->previous() }}" class="text-blue-600 hover:text-blue-800 flex items-center mb-6">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Kembali ke Daftar Film
-        </a>
 
-        <!-- Detail Film -->
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ $film->judul }}</h1>
-        <p class="text-sm text-gray-500 italic mb-6">{{ $film->durasi_menit }} menit | Rating: {{ $film->rating }}</p>
+<section class="content py-5" style="background-color: #f4f6f9; min-height: 100vh;">
+<div class="container-fluid">
+<div class="row">
+<div class="col-lg-8 col-md-10 mx-auto">
 
-        <!-- Area Pemilihan Tanggal -->
-        <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Pilih Tanggal Tayang:</h2>
-        <div class="flex flex-wrap gap-3 mb-6" id="date-filters">
-            @foreach($availableDates as $date)
-                @php
-                    // Pastikan Carbon digunakan dengan benar
-                    \Carbon\Carbon::setLocale('id');
-                    $carbonDate = \Carbon\Carbon::parse($date);
-                    $formattedDate = $carbonDate->isoFormat('dddd, D MMMM');
-                    $isToday = $carbonDate->isToday();
-                @endphp
-                <button
-                    data-tanggal="{{ $date }}"
-                    class="date-button px-4 py-2 rounded-full text-sm font-medium border transition-all duration-300 whitespace-nowrap
-                        @if ($loop->first) bg-indigo-600 text-white border-indigo-600 shadow-md @else bg-gray-100 text-gray-700 border border-gray-300 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 @endif
-                    "
-                >
-                    {{ $formattedDate }}
-                    @if ($isToday)
-                        <span class="ml-1 text-xs font-bold hidden sm:inline-block">(Hari Ini)</span>
-                    @endif
-                </button>
-            @endforeach
+            {{-- Kembali ke Jadwal --}}
+            <div class="mb-4">
+                {{-- Menggunakan film_id dari $jadwal untuk kembali ke halaman pemilihan jadwal --}}
+                {{-- Asumsi route untuk halaman jadwal film adalah 'film.schedule' --}}
+                <a href="{{ route('film.schedule', ['filmId' => $jadwal->film_id]) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Pemilihan Jadwal
+                </a>
+            </div>
+
+            <div class="card card-primary card-outline shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title font-weight-bold">Pilih Kursi Anda</h3>
+                </div>
+                <div class="card-body">
+                    
+                    {{-- Detail Jadwal --}}
+                    {{-- Catatan: Pastikan relasi 'film' dan 'studio' di-load di Controller agar properti ini tersedia. --}}
+                    <h1 class="text-2xl font-weight-bold text-dark mb-1">{{ $jadwal->film->judul ?? 'Film Tidak Ditemukan' }}</h1>
+                    <p class="text-sm text-muted mb-3">
+                        Studio & Waktu Tayang: 
+                        <span class="font-weight-bold">{{ $jadwal->studio->nama ?? 'Studio N/A' }}</span> - 
+                        {{ \Carbon\Carbon::parse($jadwal->tanggal)->isoFormat('dddd, D MMMM YYYY') }} 
+                        <span class="font-weight-bold">{{ substr($jadwal->jam_mulai, 0, 5) }}</span>
+                        | Harga Tiket: <span class="text-success font-weight-bold">Rp {{ number_format($jadwal->harga, 0, ',', '.') }}</span>
+                    </p>
+
+                    <div class="text-center mb-4">
+                        <div class="bg-dark text-white p-2 rounded-lg shadow-sm mx-auto" style="width: 80%; max-width: 400px;">
+                            Layar Bioskop
+                        </div>
+                    </div>
+
+                    {{-- Form Pemilihan Kursi --}}
+                    {{-- Ganti action URL ini ke route POST yang akan memproses pemesanan --}}
+                    <form id="seat-selection-form" action="{{ route('user.pemesanan.process') }}" method="POST"> 
+                        @csrf
+                        <input type="hidden" name="jadwal_id" value="{{ $jadwal->id }}">
+                        {{-- Input ini akan diisi oleh JavaScript dengan daftar kursi yang dipilih --}}
+                        <input type="hidden" id="selected_seats_input" name="seats" required>
+                        
+                        {{-- Peta Kursi (Contoh Sederhana) --}}
+                        <div id="seat-map" class="d-flex flex-column align-items-center p-4 bg-light rounded-lg shadow-inner border">
+                            @php
+                                // Atur baris dan kolom sesuai studio Anda
+                                $rows = range('A', 'G');
+                                $cols = range(1, 10);
+                                // Asumsi $kursi_terisi adalah array ID kursi yang sudah dipesan (misalnya: ['A1', 'C5'])
+                                $reservedSeats = $kursi_terisi; 
+                            @endphp
+
+                            @foreach ($rows as $row)
+                                <div class="seat-row d-flex justify-content-center mb-2" style="gap: 8px;">
+                                    {{-- Label Baris --}}
+                                    <div class="seat-label font-weight-bold text-dark text-sm mt-1" style="width: 30px; text-align: right;">{{ $row }}</div>
+                                    
+                                    @foreach ($cols as $col)
+                                        @php
+                                            $seatId = $row . $col;
+                                            $isReserved = in_array($seatId, $reservedSeats);
+                                            $seatClass = $isReserved ? 'seat-reserved bg-secondary' : 'seat-available bg-white border border-secondary text-dark';
+                                        @endphp
+                                        <button 
+                                            type="button" 
+                                            data-seat="{{ $seatId }}" 
+                                            class="seat-button btn btn-sm rounded-sm p-0 {{ $seatClass }}" 
+                                            style="width: 30px; height: 30px; line-height: 28px; font-size: 10px;"
+                                            {{ $isReserved ? 'disabled' : '' }}
+                                        >
+                                            {{ $col }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Keterangan dan Display Kursi Terpilih --}}
+                        <div class="mt-4 text-center">
+                            <span class="badge badge-success mr-3">Tersedia</span>
+                            <span class="badge badge-secondary mr-3">Terisi</span>
+                            <span class="badge badge-danger">Dipilih</span>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <h5 class="font-weight-bold text-dark">Kursi Dipilih:</h5>
+                            <p id="selected-seats-display" class="text-xl font-weight-bold text-danger">Belum ada kursi yang dipilih</p>
+                        </div>
+
+                        {{-- Tombol Lanjut --}}
+                        <div class="mt-4">
+                            <button type="submit" id="submit-button" class="btn btn-danger btn-block btn-lg" disabled>
+                                Lanjut ke Pembayaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
-
-        <!-- Area Jadwal Tayang Tersedia -->
-        <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Jadwal yang Tersedia:</h2>
-        
-        <!-- Container untuk menampilkan tombol-tombol jadwal tayang -->
-        <div id="schedule-list" class="flex flex-wrap gap-4">
-            <p id="no-schedule-message" class="text-gray-500 italic hidden">Tidak ada jadwal tayang tersedia untuk tanggal yang dipilih.</p>
-        </div>
-
-        <!-- Data Jadwal Tersembunyi (Disimpan dari Controller) -->
-        <!-- Pastikan controller Anda mengirim variabel $allSchedules yang berisi semua jadwal tayang -->
-        <input type="hidden" id="all-schedules-data" value="{{ json_encode($allSchedules) }}">
     </div>
 </div>
 
+
+</section>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dateButtons = document.querySelectorAll('.date-button');
-        const scheduleList = document.getElementById('schedule-list');
-        const noScheduleMessage = document.getElementById('no-schedule-message');
+document.addEventListener('DOMContentLoaded', function() {
+const seatMap = document.getElementById('seat-map');
+const selectedSeatsInput = document.getElementById('selected_seats_input');
+const selectedSeatsDisplay = document.getElementById('selected-seats-display');
+const submitButton = document.getElementById('submit-button');
+let selectedSeats = [];
+
+    function updateDisplay() {
+        selectedSeats.sort();
+        selectedSeatsDisplay.textContent = selectedSeats.length &gt; 0 ? selectedSeats.join(&#39;, &#39;) : &#39;Belum ada kursi yang dipilih&#39;;
+        selectedSeatsInput.value = selectedSeats.join(&#39;,&#39;);
         
-        // Ambil data jadwal dari hidden input dan parse
-        const allSchedulesData = JSON.parse(document.getElementById('all-schedules-data').value);
+        // Tombol diaktifkan hanya jika ada kursi yang dipilih
+        submitButton.disabled = selectedSeats.length === 0; 
+    }
 
-        // Fungsi untuk format rupiah (hanya contoh, sesuaikan jika perlu)
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-        }
+    seatMap.addEventListener(&#39;click&#39;, function(e) {
+        const button = e.target.closest(&#39;.seat-button&#39;);
+        if (!button || button.disabled) return;
 
-        // Fungsi utama untuk merender jadwal
-        function renderSchedules(selectedDate) {
-            scheduleList.innerHTML = ''; // Kosongkan daftar jadwal sebelumnya
-            noScheduleMessage.classList.add('hidden');
+        const seatId = button.dataset.seat;
+        const index = selectedSeats.indexOf(seatId);
 
-            const schedulesForDate = allSchedulesData.filter(schedule => schedule.tanggal === selectedDate);
-            
-            if (schedulesForDate.length === 0) {
-                noScheduleMessage.classList.remove('hidden');
+        if (index &gt; -1) {
+            // Hapus kursi jika sudah dipilih (Deselect)
+            selectedSeats.splice(index, 1);
+            button.classList.remove(&#39;btn-danger&#39;);
+            button.classList.add(&#39;bg-white&#39;, &#39;border-secondary&#39;, &#39;text-dark&#39;);
+        } else {
+            // Maksimum 5 kursi
+            if (selectedSeats.length &gt;= 5) {
+                // Menggunakan alert sederhana, Anda bisa menggantinya dengan modal Bootstrap jika ingin lebih rapi
+                alert(&quot;Maksimal 5 kursi dapat dipilih dalam satu transaksi.&quot;);
                 return;
             }
-
-            // Grouping schedules by studio and then rendering time buttons
-            const groupedByStudio = schedulesForDate.reduce((acc, schedule) => {
-                const studioName = schedule.studio.nama;
-                if (!acc[studioName]) {
-                    acc[studioName] = [];
-                }
-                acc[studioName].push(schedule);
-                return acc;
-            }, {});
-
-            for (const studioName in groupedByStudio) {
-                const studioContainer = document.createElement('div');
-                studioContainer.className = 'w-full mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50';
-                
-                // Judul Studio
-                const studioTitle = document.createElement('h3');
-                studioTitle.className = 'text-lg font-bold text-gray-700 mb-3';
-                studioTitle.textContent = studioName;
-                studioContainer.appendChild(studioTitle);
-
-                // Container Jam Tayang
-                const timeButtonContainer = document.createElement('div');
-                timeButtonContainer.className = 'flex flex-wrap gap-3';
-
-                groupedByStudio[studioName].forEach(schedule => {
-                    // --- Bagian PENTING: Tombol yang mengarah ke Seat Selection ---
-                    const link = document.createElement('a');
-                    // Rute Seat Selection: /user/pemesanan/{jadwal_id}/select-seat
-                    // Sesuaikan dengan rute Laravel Anda jika berbeda
-                    link.href = `/user/pemesanan/${schedule.id}/select-seat`; 
-                    
-                    const timeButton = document.createElement('button');
-                    timeButton.className = 'px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition duration-150 shadow-md';
-                    timeButton.innerHTML = `
-                        ${schedule.jam_mulai.substring(0, 5)} 
-                        <span class="ml-1 text-xs font-normal">(${formatRupiah(schedule.harga)})</span>
-                    `;
-                    
-                    link.appendChild(timeButton);
-                    timeButtonContainer.appendChild(link);
-                });
-
-                studioContainer.appendChild(timeButtonContainer);
-                scheduleList.appendChild(studioContainer);
-            }
+            
+            // Pilih kursi
+            selectedSeats.push(seatId);
+            button.classList.remove(&#39;bg-white&#39;, &#39;border-secondary&#39;, &#39;text-dark&#39;);
+            button.classList.add(&#39;btn-danger&#39;);
         }
 
-        // Event listener untuk tombol tanggal
-        dateButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Hapus styling aktif dari semua tombol
-                dateButtons.forEach(btn => {
-                    btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow-md');
-                    btn.classList.add('bg-gray-100', 'text-gray-700', 'border', 'border-gray-300', 'hover:bg-indigo-500', 'hover:text-white', 'hover:border-indigo-500');
-                });
-
-                // Tambahkan styling aktif pada tombol yang diklik
-                this.classList.remove('bg-gray-100', 'text-gray-700', 'border', 'border-gray-300', 'hover:bg-indigo-500', 'hover:text-white', 'hover:border-indigo-500');
-                this.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow-md');
-
-                // Render jadwal untuk tanggal yang dipilih
-                const selectedDate = this.getAttribute('data-tanggal');
-                renderSchedules(selectedDate);
-            });
-        });
-
-        // Panggil render untuk tanggal pertama saat halaman dimuat
-        if (dateButtons.length > 0) {
-            dateButtons[0].click();
-        } else {
-             // Tampilkan pesan jika tidak ada tanggal tersedia sama sekali
-             scheduleList.innerHTML = '';
-             noScheduleMessage.textContent = 'Tidak ada tanggal tayang yang tersedia untuk film ini.';
-             noScheduleMessage.classList.remove('hidden');
-             noScheduleMessage.classList.add('block', 'p-4', 'bg-red-100', 'text-red-700', 'rounded-lg');
-        }
+        updateDisplay();
     });
+
+    // Inisialisasi tampilan
+    updateDisplay();
+});
+
+
 </script>
+
 @endsection

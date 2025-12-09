@@ -16,7 +16,9 @@ class JadwalTayang extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal' => 'date:Y-m-d',
+    'jam_mulai' => 'datetime:H:i',
+    'harga',
     ];
 
     public function film(): BelongsTo
