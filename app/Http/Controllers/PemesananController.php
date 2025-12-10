@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log; // Pastikan Log di-import untuk error handling
 use Exception;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class PemesananController extends Controller
 {
@@ -320,6 +322,67 @@ public function confirmPayment($kode_pemesanan)
             DB::rollBack();
             \Log::error('Gagal konfirmasi pembayaran Pemesanan: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan sistem saat memproses pembayaran. Silakan coba lagi.');
+        }
+    }
+    public function generatePayment(Request $request, $kode_pemesanan)
+    {
+        // 1. Ambil Data Pemesanan
+        $pemesanan = Pemesanan::where('kode_pemesanan', $kode_pemesanan)
+            ->with(['user', 'detailPemesanan']) // Pastikan Anda punya relasi user dan detailPemesanan
+            ->firstOrFail();
+
+        // 2. Konfigurasi Midtrans
+        // Gunakan fungsi config() untuk membaca kunci dari .env
+        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION'); 
+        Config::$isSanitized = true; 
+        Config::$is3ds = true; 
+
+        // 3. Persiapkan Parameter Transaksi
+        $transaction_details = [
+            'order_id'      => $pemesanan->kode_pemesanan, // HARUS UNIK
+            'gross_amount'  => $pemesanan->total_harga,
+        ];
+        
+        $item_details = [];
+        // Buat detail item dari kursi yang dipesan
+        $harga_per_tiket = $pemesanan->total_harga / $pemesanan->jumlah_tiket;
+        
+        foreach ($pemesanan->detailPemesanan as $index => $detail) {
+            $item_details[] = [
+                'id'       => $detail->nomor_kursi, 
+                'price'    => $harga_per_tiket,
+                'quantity' => 1,
+                'name'     => "Tiket Kursi " . $detail->nomor_kursi,
+            ];
+        }
+
+        $customer_details = [
+            'first_name' => $pemesanan->user->name ?? 'Pelanggan', // Ambil nama user yang login
+            'email'      => $pemesanan->user->email ?? 'pelanggan@example.com',
+        ];
+
+        $params = [
+            'transaction_details' => $transaction_details,
+            'item_details'        => $item_details,
+            'customer_details'    => $customer_details,
+        ];
+
+        try {
+            // 4. Panggil Midtrans Snap untuk mendapatkan URL Redirect
+            $snapResponse = Snap::createTransaction($params);
+
+            // Simpan token/url pembayaran (opsional, tapi disarankan)
+            $pemesanan->snap_token = $snapResponse->token;
+            $pemesanan->payment_url = $snapResponse->redirect_url;
+            $pemesanan->save();
+            
+            // 5. Redirect Pengguna ke Halaman Pembayaran Midtrans
+            return redirect($snapResponse->redirect_url);
+
+        } catch (\Exception $e) {
+            // Tangani error jika koneksi ke Midtrans gagal
+            return back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
         }
     }
 }

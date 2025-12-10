@@ -85,12 +85,14 @@
                     {{-- 3. INTEGRASI TOMBOL KONFIRMASI PEMBAYARAN --}}
                     {{-- Tombol hanya muncul dan bisa diakses jika status 'menunggu_pembayaran' --}}
                     {{-- ------------------------------------------------ --}}
-                    @if ($pemesanan->status === 'menunggu_pembayaran')
-                        <form id="payment-form" action="{{ route('user.pemesanan.confirmPayment', $pemesanan->kode_pemesanan) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success" id="pay-button">Konfirmasi Pembayaran (Dummy)</button> 
-                        </form>
-                    @endif
+                   @if ($pemesanan->status === 'menunggu_pembayaran')
+    {{-- PASTIKAN ROUTE BARU INI SUDAH DIDAFTARKAN DI routes/web.php --}}
+    <form id="payment-form" action="{{ route('user.pemesanan.generatePayment', $pemesanan->kode_pemesanan) }}" method="POST">
+        @csrf
+        {{-- Ganti id pay-button jika Anda tidak menggunakan Midtrans Pop-up --}}
+        <button type="submit" class="btn btn-success" id="pay-button">Bayar Sekarang</button> 
+    </form>
+@endif
                     {{-- ------------------------------------------------ --}}
                 </div>
             </div>
