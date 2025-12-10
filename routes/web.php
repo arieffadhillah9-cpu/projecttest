@@ -99,7 +99,7 @@ Route::middleware('auth')->group(function () {
         ->name('user.pemesanan.show');
 
         // Rute untuk memicu update status pembayaran (dari 'menunggu_pembayaran' ke 'paid')
-    Route::post('/user/pemesanan/{kode_pemesanan}/confirm-payment', [PemesananController::class, 'confirmPayment'])
-        ->name('user.pemesanan.confirmPayment');
+    Route::post('/pemesanan/{kode_pemesanan}/payment', [PemesananController::class, 'generatePayment'])
+    ->name('user.pemesanan.generatePayment');
         
 });
