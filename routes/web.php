@@ -98,8 +98,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
         ->name('user.pemesanan.show');
 
-        // Rute untuk memicu update status pembayaran (dari 'menunggu_pembayaran' ke 'paid')
-    Route::post('/pemesanan/{kode_pemesanan}/payment', [PemesananController::class, 'generatePayment'])
+   // Rute untuk memanggil Midtrans API dan menghasilkan URL pembayaran
+Route::post('/pemesanan/{kode_pemesanan}/payment', [PemesananController::class, 'generatePayment'])
     ->name('user.pemesanan.generatePayment');
         
 });
