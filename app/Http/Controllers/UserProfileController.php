@@ -1,11 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Pemesanan;
+use Illuminate\Support\Facades\Log;
+use App\Models\Film;
+use App\Models\DetailPemesanan;
+use App\Models\JadwalSeat;
 
 class UserProfileController extends Controller
 {
@@ -86,25 +91,68 @@ class UserProfileController extends Controller
     /**
      * Tampilkan detail pemesanan spesifik (menggunakan data mock sementara).
      */
-    public function showPemesanan(string $kode_pemesanan)
+    public function showPemesanan($kode_pemesanan)
     {
-        // =========================================================
-        // START MOCK DATA (Simulasi Data Database)
-        // =========================================================
-        // Kita hanya mengembalikan satu data yang lengkap untuk diuji
-        $pemesanan = $this->createMockPemesanan(1, $kode_pemesanan, 'paid');
-        // =========================================================
-        // END MOCK DATA
-        // =========================================================
+        // 1. Ambil data pemesanan beserta relasi yang diperlukan (Film, Studio, Kursi)
+        $pemesanan = Pemesanan::with([
+            'jadwal.film', 
+            'jadwal.studio',
+            'detailPemesanan'
+            
+        ])
+        // 2. Cari berdasarkan kode_pemesanan
+        ->where('kode_pemesanan', $kode_pemesanan)
+        // 3. Batasi hanya untuk user yang sedang login (keamanan)
+        ->where('user_id', auth()->id())
+        ->first();
 
-        // Simulasi logika not found/unauthorized (opsional)
-        if (!in_array($kode_pemesanan, ['SEAT-1123', 'MOCK_TEST'])) {
-             // Jika kode_pemesanan tidak cocok dengan mock, kita anggap 404
-             // Hapus baris ini setelah pengujian selesai
-             // abort(404, 'Pemesanan tidak ditemukan atau Anda tidak memiliki akses.');
+        // 4. Handle jika pemesanan tidak ditemukan
+        if (!$pemesanan) {
+            return redirect()->route('user.history')->with('error', 'Detail pemesanan tidak ditemukan.');
         }
 
-        // Mengarah ke resources/views/user/pemesanan/show.blade.php
-        return view('user.pemesanan.show', compact('pemesanan'));
+        // 5. Hitung Batas Waktu Pembayaran (Contoh: 30 menit dari waktu pembuatan)
+        $waktuKadaluwarsa = Carbon::parse($pemesanan->created_at)->addMinutes(30);
+        $sekarang = Carbon::now();
+        
+        // 6. Tentukan status pembayaran (apakah masih berlaku atau sudah kadaluwarsa)
+        $isExpired = $sekarang->greaterThan($waktuKadaluwarsa) && $pemesanan->status === 'menunggu_pembayaran';
+
+
+        // 7. Redirect jika pemesanan sudah kadaluwarsa
+       if ($isExpired) {
+    if ($pemesanan->status === 'menunggu_pembayaran') {
+        // --- LOG 1: PEMESANAN DIBAWALKAN ---
+        Log::info("Pemesanan [{$kode_pemesanan}] kedaluwarsa. Mengubah status dan melepaskan kursi."); 
+        
+        $pemesanan->status = 'expired';
+        $pemesanan->save();
+        
+        // Cek apakah detail kursi ada
+        $nomorKursiDibatalkan = $pemesanan->detailPemesanan->pluck('nomor_kursi')->toArray();
+        
+        // --- LOG 2: KURSI YANG DITEMUKAN ---
+        Log::info("Kursi yang ditemukan untuk pelepasan: " . implode(', ', $nomorKursiDibatalkan));
+
+        if (!empty($nomorKursiDibatalkan)) {
+            // Logika Update status di tabel jadwal_seats
+            $updatedRows = JadwalSeat::where('jadwal_tayang_id', $pemesanan->jadwal_id)
+                ->whereIn('nomor_kursi', $nomorKursiDibatalkan)
+                ->update(['status' => 'available']);
+            
+            // --- LOG 3: JUMLAH BARIS YANG DIUPDATE ---
+            Log::info("Jumlah baris JadwalSeat yang berhasil diupdate: {$updatedRows}");
+
+            // Hapus detail pemesanan
+            $pemesanan->detailPemesanan()->delete();
+        } else {
+             Log::warning("Detail kursi tidak ditemukan untuk kode pemesanan [{$kode_pemesanan}]. Kursi tidak dilepas.");
+        }
+    }
+    return redirect()->route('user.history')->with('error', 'Waktu pembayaran telah habis.');
+}
+        $films = \App\Models\Film::all(); // Ganti dengan query yang lebih spesifik jika perlu
+        // 8. Kirim data ke view
+        return view('user.pemesanan.show_pemesanan', compact('pemesanan', 'waktuKadaluwarsa','films'));
     }
 }

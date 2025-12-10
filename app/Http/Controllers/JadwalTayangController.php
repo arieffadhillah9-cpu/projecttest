@@ -152,47 +152,22 @@ class JadwalTayangController extends Controller
      * @param int $filmId ID dari Film
      * @return \Illuminate\View\View
      */
-     public function getSchedulesForFilm(string $filmId)
+     
+    public function getSchedulesForFilm($filmId)
     {
-        // 1. Ambil semua Jadwal Tayang yang valid (termasuk relasi studio dan film)
-        $schedules = JadwalTayang::with(['studio', 'film'])
-            ->where('film_id', $filmId)
-            // Filter jadwal yang tanggalnya sama atau setelah hari ini
-            // Mengganti 'tanggal_tayang' menjadi 'tanggal' agar konsisten dengan field lain
-            ->where('tanggal', '>=', Carbon::today()->toDateString()) 
-            ->orderBy('tanggal', 'asc')
-            ->orderBy('jam_mulai', 'asc')
-            ->get();
-        
-        // Cek apakah film ditemukan
-        $film = Film::find($filmId);
-        if (!$film) {
-            // Tangani jika film tidak ditemukan (misalnya redirect atau 404)
-            abort(404, 'Film tidak ditemukan.');
-        }
+        // 1. Ambil data Film berdasarkan $filmId
+        // Anda bisa menggunakan findOrFail untuk penanganan error yang lebih baik
+        $film = Film::findOrFail($filmId); 
 
-        // 2. Ambil daftar tanggal unik yang tersedia
-        // Mengganti 'tanggal_tayang' menjadi 'tanggal'
-        $availableDates = $schedules->pluck('tanggal')->unique()->values()->all();
+        // 2. Ambil data Jadwal Tayang yang terkait dengan $filmId
+        // dan urutkan berdasarkan tanggal dan jam
+        $jadwalTayang = JadwalTayang::where('film_id', $filmId)
+                                    ->with('studio') // Agar $jadwal->studio->nama bisa diakses
+                                    ->orderBy('tanggal', 'asc')
+                                    ->orderBy('jam_mulai', 'asc')
+                                    ->get();
 
-        // 3. Persiapkan data jadwal lengkap dalam format yang mudah diolah JS (JSON)
-        $allSchedules = $schedules->map(function ($schedule) {
-            return [
-                'id' => $schedule->id,
-                'studio_id' => $schedule->studio_id,
-                'studio_nama' => $schedule->studio->nama,
-                // Mengambil nilai dari field 'tanggal'
-                'tanggal_tayang' => $schedule->tanggal, 
-                'jam_mulai' => $schedule->jam_mulai,
-                'harga' => $schedule->harga,
-                'film_id' => $schedule->film_id,
-            ];
-        })->groupBy('tanggal'); // Mengelompokkan berdasarkan field 'tanggal'
-
-        return view('layout.booking_schedule', [
-            'film' => $film, // Data film
-            'availableDates' => $availableDates, // Daftar tanggal untuk tombol
-            'allSchedules' => $allSchedules, // Semua jadwal yang dikelompokkan (untuk JS)
-        ]);
+        // 3. Kirim kedua variabel ($film dan $jadwalTayang) ke view
+        return view('film.schedule', compact('film', 'jadwalTayang'));
     }
 }

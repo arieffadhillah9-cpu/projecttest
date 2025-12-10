@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Carbon\Carbon;
 use App\Models\Pemesanan;
 use App\Models\DetailPemesanan;
 use App\Models\JadwalTayang; 
@@ -48,174 +48,178 @@ class PemesananController extends Controller
      * @param int $jadwalId
      * @return \Illuminate\View\View
      */
-    public function selectSeat($jadwalId)
-    {
-        $jadwal = JadwalTayang::with(['film', 'studio'])->findOrFail($jadwalId);
+public function selectSeat($jadwalId)
+{
+    $jadwal = JadwalTayang::with(['film', 'studio'])->findOrFail($jadwalId);
 
-        // Ambil objek film dari relasi jadwal
-        $film = $jadwal->film;
-        
-        // Definisikan variabel dummy yang mungkin dibutuhkan di layout (seperti pada kode Anda)
-        $availableDates = [];
-        $allSchedules = []; 
+    // Ambil objek film dari relasi jadwal
+    $film = $jadwal->film;
+    
+    // --- PERBAIKAN: Tambahkan variabel $films yang dibutuhkan oleh layout ---
+    // Asumsi: Layout Anda membutuhkan daftar semua film. Sesuaikan query ini
+    // dengan kebutuhan riil data film yang ingin ditampilkan di layout (misalnya di sidebar).
+    
+    // Pastikan Anda mengimpor Model Film di awal file Controller jika belum: use App\Models\Film;
+    $films = \App\Models\Film::all(); 
+    
+    // ----------------------------------------------------------------------
+    
+    // Definisikan variabel dummy yang mungkin dibutuhkan di layout (seperti pada kode Anda)
+    $availableDates = [];
+    $allSchedules = []; 
 
-        // Pastikan jadwal_seats sudah ter-generate; kalau belum, generate on-the-fly dari seats studio
-        $jadwalSeats = JadwalSeat::where('jadwal_tayang_id', $jadwalId)->get();
+    // Pastikan jadwal_seats sudah ter-generate; kalau belum, generate on-the-fly dari seats studio
+    $jadwalSeats = JadwalSeat::where('jadwal_tayang_id', $jadwalId)->get();
 
-        if ($jadwalSeats->isEmpty()) {
-            // trigger manual generation (mirip booted) - fallback
-            $seats = \App\Models\Seat::where('studio_id', $jadwal->studio_id)->get();
-            $insert = [];
-            if ($seats->isEmpty()) {
-                $kapasitas = $jadwal->studio->kapasitas ?? 50;
-                for ($i = 1; $i <= $kapasitas; $i++) {
-                    $insert[] = [
-                        'jadwal_tayang_id' => $jadwal->id,
-                        'seat_id' => null,
-                        'nomor_kursi' => 'S' . $i,
-                        'status' => 'available',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-            } else {
-                foreach ($seats as $s) {
-                    $insert[] = [
-                        'jadwal_tayang_id' => $jadwal->id,
-                        'seat_id' => $s->id,
-                        'nomor_kursi' => $s->nomor_kursi,
-                        'status' => 'available',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
+    if ($jadwalSeats->isEmpty()) {
+        // ... (Logika fallback generasi kursi, DIBIARKAN SAMA) ...
+        $seats = \App\Models\Seat::where('studio_id', $jadwal->studio_id)->get();
+        $insert = [];
+        if ($seats->isEmpty()) {
+            $kapasitas = $jadwal->studio->kapasitas ?? 50;
+            for ($i = 1; $i <= $kapasitas; $i++) {
+                $insert[] = [
+                    'jadwal_tayang_id' => $jadwal->id,
+                    'seat_id' => null,
+                    'nomor_kursi' => 'S' . $i,
+                    'status' => 'available',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
-            DB::table('jadwal_seats')->insert($insert);
-            $jadwalSeats = JadwalSeat::where('jadwal_tayang_id', $jadwalId)->get();
+        } else {
+            foreach ($seats as $s) {
+                $insert[] = [
+                    'jadwal_tayang_id' => $jadwal->id,
+                    'seat_id' => $s->id,
+                    'nomor_kursi' => $s->nomor_kursi,
+                    'status' => 'available',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
-
-        // kursi terisi = semua jadwal_seats dengan status 'booked' atau 'locked' 
-        // Menggunakan snake_case ($kursi_terisi) agar sesuai dengan view Anda.
-        $kursi_terisi = $jadwalSeats->filter(function($js) {
-            return in_array($js->status, ['booked','locked']);
-        })->pluck('nomor_kursi')->toArray();
-
-        // PENTING: Menggunakan 'kursi_terisi' dalam compact()
-        return view('user.pemesanan.seat_selection', compact('jadwal', 'kursi_terisi', 'jadwalSeats', 'film', 'availableDates', 'allSchedules'));
+        DB::table('jadwal_seats')->insert($insert);
+        $jadwalSeats = JadwalSeat::where('jadwal_tayang_id', $jadwalId)->get();
     }
+    
+    // kursi terisi = semua jadwal_seats dengan status 'booked' atau 'locked' 
+    // Menggunakan snake_case ($kursi_terisi) agar sesuai dengan view Anda.
+    $kursi_terisi = $jadwalSeats->filter(function($js) {
+        return in_array($js->status, ['booked','locked']);
+    })->pluck('nomor_kursi')->toArray();
+
+    // PENTING: Tambahkan 'films' ke dalam compact()
+    return view('user.pemesanan.select_seat', compact('jadwal', 'kursi_terisi', 'jadwalSeats', 'film', 'availableDates', 'allSchedules', 'films'));
+}
 
     /**
      * USER: Memproses pemesanan tiket dari pemilihan kursi (Step 2).
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
-     */ public function processPemesanan(Request $request)
-    {
-        // 1. Validasi Input Dasar
-        $request->validate([
-            'jadwal_id' => 'required|exists:jadwal_tayangs,id',
-            'kode_kursi' => 'required|string',
-        ]);
+     */ 
 
-        // 2. Autentikasi Pengguna
-        $userId = Auth::id();
-        if (!$userId) {
-            return redirect()->route('login')->with('error', 'Anda harus login untuk melanjutkan pemesanan.');
-        }
+   public function processPemesanan(Request $request)
+{
+    \Log::info('Proses Pemesanan Dimulai', $request->all());
+    // A. Validasi (Ini yang paling sering menyebabkan reload tanpa error)
+    $request->validate([
+        'jadwal_id' => 'required|exists:jadwal_tayangs,id',
+        'kursi_dipilih' => 'required|array|min:1',
+        'kursi_dipilih.*' => 'required|string',
+    ]);
 
-        // 3. Pembersihan dan Pengecekan Kursi
-        $selectedSeats = array_filter(array_map('trim', explode(',', $request->input('kode_kursi'))));
-        
-        if (empty($selectedSeats)) {
-            return redirect()->back()->with('error', 'Anda harus memilih minimal satu kursi.')->withInput();
-        }
+    $jadwalId = $request->input('jadwal_id');
+    $kursiDipilih = $request->input('kursi_dipilih');
+    $userId = auth()->id();
+    // -----------------------------------------------------------------
+    // A.1. AMBIL HARGA DINAMIS DARI JADWAL TAYANG
+    // -----------------------------------------------------------------
+    $jadwal = JadwalTayang::find($jadwalId);
 
-        // 4. Ambil Data Jadwal & Hitung Harga
-        $jadwal = JadwalTayang::findOrFail($request->input('jadwal_id'));
-        $jumlahTiket = count($selectedSeats);
-        $hargaPerTiket = $jadwal->harga;
-        $totalHarga = $jumlahTiket * $hargaPerTiket;
-
-        // ===============================================
-        // 5. TRANSAKSI DATABASE (PENTING UNTUK KONSISTENSI)
-        // ===============================================
-        DB::beginTransaction();
-        try {
-            // --- PROTEKSI RACE CONDITION (LOCKING) ---
-            $conflicts = JadwalSeat::where('jadwal_tayang_id', $jadwal->id)
-                ->whereIn('nomor_kursi', $selectedSeats)
-                ->whereIn('status', ['booked', 'locked']) // Periksa status 'booked' DAN 'locked'
-                ->lockForUpdate() // Kunci baris-baris ini selama transaksi
-                ->pluck('nomor_kursi')
-                ->toArray();
-
-            if (!empty($conflicts)) {
-                DB::rollBack();
-                $seatsList = implode(', ', $conflicts);
-                return redirect()->back()->with('error', "Kursi berikut sudah terisi atau sedang diproses oleh pengguna lain: {$seatsList}. Silakan pilih kursi lain.")->withInput();
-            }
-
-            // --- OPTIONAL: UPDATE STATUS KE 'LOCKED' ---
-            $now = now();
-            JadwalSeat::where('jadwal_tayang_id', $jadwal->id)
-                ->whereIn('nomor_kursi', $selectedSeats)
-                ->update(['status' => 'locked', 'locked_until' => $now->copy()->addMinutes(5)]);
-
-
-            // --- CREATE PEMESANAN ---
-            $pemesanan = Pemesanan::create([
-                'user_id' => $userId,
-                'jadwal_id' => $jadwal->id,
-                'kode_pemesanan' => 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6)), 
-                'jumlah_tiket' => $jumlahTiket,
-                'total_harga' => $totalHarga,
-                'status' => 'pending', // Status awal: menunggu pembayaran
-                'waktu_pemesanan' => $now,
-            ]);
-
-            // --- CREATE DETAIL PEMESANAN ---
-            $details = [];
-            foreach ($selectedSeats as $kursi) {
-                $details[] = [
-                    'pemesanan_id' => $pemesanan->id,
-                    'jadwal_id' => $jadwal->id, 
-                    'nomor_kursi' => $kursi,
-                    'harga' => $hargaPerTiket,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
-            DetailPemesanan::insert($details);
-
-            // --- UPDATE STATUS KURSI JADI 'BOOKED' (Selesai diproses) ---
-            JadwalSeat::where('jadwal_tayang_id', $jadwal->id)
-                ->whereIn('nomor_kursi', $selectedSeats)
-                ->update(['status' => 'booked', 'locked_until' => null, 'updated_at' => now()]);
-
-
-            // Commit transaksi jika semua berhasil
-            DB::commit();
-
-            // 6. Redirect Sukses
-            return redirect()
-                ->route('user.pemesanan.show', ['kode_pemesanan' => $pemesanan->kode_pemesanan])
-                ->with('success', 'Pemesanan berhasil dibuat. Mohon selesaikan pembayaran dalam waktu 5 menit.');
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            // PENTING: Pastikan Anda telah mengimpor Facade Log di atas.
-            Log::error('Gagal memproses pemesanan (Rollback): ' . $e->getMessage() . ' | User ID: ' . $userId);
-
-            // --- CLEANUP LOCKING (Jika terjadi kegagalan sistem) ---
-            JadwalSeat::where('jadwal_tayang_id', $jadwal->id)
-                ->whereIn('nomor_kursi', $selectedSeats)
-                ->where('status', 'locked')
-                ->update(['status' => 'available', 'locked_until' => null]);
-            
-            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat memproses pemesanan. Silakan coba lagi.')->withInput();
-        }
-
+    if (!$jadwal) {
+        return back()->with('error', 'Jadwal tayang tidak valid atau tidak ditemukan.');
     }
+    
+    // A.2. DEFINISIKAN HARGA DARI DATABASE
+    $hargaPerKursi = $jadwal->harga; // <<< HARGA DIAMBIL DARI KOLOM 'harga' DI TABEL JADWAL_TAYANG
+    \Log::info('Harga per Kursi Ditemukan: ' . $hargaPerKursi);
+    // -----------------------------------------------------------------
+    DB::beginTransaction();
 
+    try {
+        \Log::info('Start Kursi Locking Check'); // Log Step 1
+        // B. Kunci Kursi
+        // Pastikan kursi benar-benar available, jika tidak, rollback
+        $seatsToLock = JadwalSeat::where('jadwal_tayang_id', $jadwalId)
+            ->whereIn('nomor_kursi', $kursiDipilih)
+            ->where('status', 'available')
+            ->get();
+        // *** LOG BARU UNTUK VERIFIKASI ***
+    $totalKursiDipilih = count($kursiDipilih);
+    $totalKursiDitemukan = $seatsToLock->count();
+    \Log::info("Verifikasi Kursi: Dipilih={$totalKursiDipilih}, Ditemukan Available={$totalKursiDitemukan}");
+
+        if ($seatsToLock->count() !== count($kursiDipilih)) {
+            \Log::warning('Gagal mengunci kursi. Kursi tidak available.'); // <-- Log Jika Gagal
+            DB::rollBack();
+            return back()->with('error', 'Maaf, salah satu kursi yang Anda pilih baru saja terisi oleh pengguna lain.');
+        }
+
+        // Update status menjadi 'locked'
+       JadwalSeat::whereIn('id', $seatsToLock->pluck('id'))
+    ->update([
+        'status' => 'locked',
+        // BERIKAN NILAI TIMESTAMP YANG TIDAK NULL
+        'locked_until' => Carbon::now()->addMinutes(15) 
+    ]);
+
+\Log::info('Kursi berhasil dikunci.');
+        // C. Buat Record Pemesanan
+        $pemesanan = Pemesanan::create([
+            'user_id' => $userId,
+            'jadwal_id' => $jadwalId,         // <-- Benar untuk tabel `pemesanan`
+    'kode_pemesanan' => 'P-' . strtoupper(uniqid()),
+    'jumlah_tiket' => count($kursiDipilih), // <-- Benar untuk tabel `pemesanan`
+            'total_harga' => count($kursiDipilih) * $hargaPerKursi,
+            'status' => 'menunggu_pembayaran',
+        ]);
+        $detailPemesananData = [];
+    
+    foreach ($kursiDipilih as $kursi) {
+        $detailPemesananData[] = [
+            'pemesanan_id' => $pemesanan->id, // Menggunakan ID Pemesanan yang baru dibuat
+            'jadwal_id' => $jadwalId, 
+            'nomor_kursi' => $kursi,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+    
+    // Simpan semua detail kursi sekaligus
+    DetailPemesanan::insert($detailPemesananData); 
+    // Pastikan Model DetailPemesanan di-import di awal file: use App\Models\DetailPemesanan;
+    
+    \Log::info('Detail Pemesanan berhasil dibuat.');
+    // --------------------------------------------------------------------
+    
+    \Log::info('Pemesanan berhasil dibuat: ' . $pemesanan->kode_pemesanan); // Log Step 3
+    
+    // D. Commit Transaksi
+    DB::commit();
+
+    // E. Redirect ke Halaman Pembayaran (user.pemesanan.show)
+    return redirect()->route('user.pemesanan.show', ['kode_pemesanan' => $pemesanan->kode_pemesanan])
+        ->with('success', 'Pemesanan berhasil dibuat. Silakan selesaikan pembayaran.');
+        \Log::info('Pemesanan berhasil dibuat: ' . $pemesanan->kode_pemesanan); // Log Step 3
+     
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Pemesanan Gagal: ' . $e->getMessage()); 
+        return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+    }
+}
     // --- END: FUNGSI BARU UNTUK USER: PEMILIHAN KURSI ---
     
     // Metode-metode lain...
@@ -258,5 +262,64 @@ class PemesananController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui status pemesanan. Terjadi kesalahan sistem.');
         }
     }
-    
+    public function showPaymentPage($pemesananId) 
+{
+    // A. Ambil Data Pemesanan
+    $pemesanan = Pemesanan::with(['jadwal.film', 'jadwal.studio'])
+                            ->where('user_id', auth()->id()) // Amankan dari user lain
+                            ->findOrFail($pemesananId);
+
+    // B. Kirim data ke View Pembayaran
+    return view('user.pemesanan.payment', compact('pemesanan'));
+}
+public function confirmPayment($kode_pemesanan)
+    {
+        // A. Ambil Pemesanan
+        $pemesanan = Pemesanan::with('detailPemesanan')
+            ->where('kode_pemesanan', $kode_pemesanan)
+            ->where('user_id', auth()->id())
+            ->where('status', 'menunggu_pembayaran')
+            ->first();
+
+        // Cek jika pemesanan tidak ditemukan, sudah dibayar, atau kadaluwarsa
+        if (!$pemesanan) {
+            return redirect()->route('user.history')->with('error', 'Pemesanan tidak ditemukan, sudah dibayar, atau telah kadaluwarsa.');
+        }
+
+        // Jalankan transaksi database
+        DB::beginTransaction();
+        try {
+            // 1. Ambil nomor kursi yang akan di-update
+            $nomorKursi = $pemesanan->detailPemesanan->pluck('nomor_kursi')->toArray();
+            $jadwalId = $pemesanan->jadwal_id;
+
+            // 2. Update status Pemesanan menjadi 'paid'
+            $pemesanan->update([
+                'status' => 'paid',
+                'waktu_pembayaran' => now(), // Catat waktu pembayaran
+            ]);
+            \Log::info("Pemesanan [{$kode_pemesanan}] berhasil dibayar."); // Log untuk debugging
+
+            // 3. Update status Kursi di JadwalSeat menjadi 'booked' (terjual permanen)
+            $jumlahDiupdate = JadwalSeat::where('jadwal_tayang_id', $jadwalId)
+                ->whereIn('nomor_kursi', $nomorKursi)
+                ->where('status', 'locked') // Pastikan hanya kursi yang masih 'locked' yang diubah
+                ->update([
+                    'status' => 'booked',
+                    'locked_until' => null // Hapus locked_until karena sudah terjual permanen
+                ]);
+
+            \Log::info("{$jumlahDiupdate} kursi di jadwal [{$jadwalId}] diubah menjadi 'booked'."); // Log untuk debugging
+            
+            DB::commit();
+
+            return redirect()->route('user.pemesanan.show', $kode_pemesanan)
+                ->with('success', 'Pembayaran berhasil dikonfirmasi! Tiket Anda sudah terbit.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Gagal konfirmasi pembayaran Pemesanan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses pembayaran. Silakan coba lagi.');
+        }
+    }
 }

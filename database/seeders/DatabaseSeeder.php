@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             DataBioskopSeeder::class, // Panggil Data Bioskop Seeder
             // Panggil Seeder lain yang mungkin Anda miliki
            SeatSeeder::class,
+           JadwalSeatSeeder::class, // <-- TAMBAHKAN INI
 
         ]);
     }
