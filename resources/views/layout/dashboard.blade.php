@@ -151,7 +151,7 @@
                         <div class="mt-auto">
 
                             <!-- Tombol Pesan Ticket (baru) -->
-                            <a href="#"
+                            <a href="{{ route('film.schedule', ['filmId' => $film->id]) }}"
                                class="btn btn-danger btn-sm pesan-ticket w-100 mb-2"
                                style="border-radius: 20px; padding: 6px 14px;">
                                 Pesan Ticket

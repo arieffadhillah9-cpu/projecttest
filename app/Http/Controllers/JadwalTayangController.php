@@ -7,6 +7,7 @@ use App\Models\Film;
 use App\Models\Studio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon; // <-- SOLUSI: Class Carbon harus di-import
 
 class JadwalTayangController extends Controller
 {
@@ -72,7 +73,7 @@ class JadwalTayangController extends Controller
         return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal tayang baru berhasil ditambahkan!');
     }
-     
+      
 
     /**
      * Show the form for editing the specified resource.
@@ -151,32 +152,22 @@ class JadwalTayangController extends Controller
      * @param int $filmId ID dari Film
      * @return \Illuminate\View\View
      */
+     
     public function getSchedulesForFilm($filmId)
     {
-        // 1. Ambil semua jadwal yang valid untuk film ini, diurutkan
-        $jadwal_tayang = JadwalTayang::where('film_id', $filmId)
-                                     // Pastikan jadwal belum lewat (tanggal harus >= hari ini)
-                                     ->where('tanggal', '>=', now()->toDateString())
-                                     ->orderBy('tanggal')
-                                     ->orderBy('jam_mulai')
-                                     ->get();
+        // 1. Ambil data Film berdasarkan $filmId
+        // Anda bisa menggunakan findOrFail untuk penanganan error yang lebih baik
+        $film = Film::findOrFail($filmId); 
 
-        // 2. Ambil tanggal-tanggal unik yang tersedia
-        // Menggunakan pluck('tanggal') karena nama kolomnya 'tanggal'
-        $availableDates = $jadwal_tayang->pluck('tanggal')->unique()->values();
+        // 2. Ambil data Jadwal Tayang yang terkait dengan $filmId
+        // dan urutkan berdasarkan tanggal dan jam
+        $jadwalTayang = JadwalTayang::where('film_id', $filmId)
+                                    ->with('studio') // Agar $jadwal->studio->nama bisa diakses
+                                    ->orderBy('tanggal', 'asc')
+                                    ->orderBy('jam_mulai', 'asc')
+                                    ->get();
 
-        // 3. Ambil detail film (opsional, tapi berguna untuk tampilan)
-        $film = Film::find($filmId);
-
-        // Pastikan film ditemukan dan ada jadwalnya
-        if (!$film) {
-             abort(404, 'Film tidak ditemukan.');
-        }
-        
-        // Mengirimkan data yang diperlukan ke view.
-        // Asumsi view ini dipanggil dari suatu route seperti: 
-        // Route::get('film/{film}/schedule', [JadwalTayangController::class, 'getSchedulesForFilm'])->name('film.schedule');
-        return view('booking_schedule', compact('jadwal_tayang', 'availableDates', 'film'));
+        // 3. Kirim kedua variabel ($film dan $jadwalTayang) ke view
+        return view('film.schedule', compact('film', 'jadwalTayang'));
     }
-    // ----------------------------------------
 }

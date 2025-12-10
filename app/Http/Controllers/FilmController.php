@@ -150,4 +150,29 @@ class FilmController extends Controller
         return redirect()->route('admin.film.index')
                              ->with('error', 'Gagal menghapus film.');
     }
+    public function getSchedulesForFilm($filmId)
+{
+    $film = Film::findOrFail($filmId);
+
+    // Ambil semua tanggal unik dari jadwal film ini
+    $availableDates = JadwalTayang::where('film_id', $filmId)
+        ->orderBy('tanggal', 'asc')
+        ->pluck('tanggal')
+        ->unique();
+
+    // Ambil jadwal berdasarkan tanggal yang dipilih (atau default tanggal pertama)
+    $selectedDate = request()->get('date', $availableDates->first());
+
+    $jadwal_tayang = JadwalTayang::where('film_id', $filmId)
+        ->where('tanggal', $selectedDate)
+        ->orderBy('jam_mulai', 'asc')
+        ->get();
+
+    return view('user.pemesanan.booking_schedule', [
+        'film' => $film,
+        'availableDates' => $availableDates,
+        'selectedDate' => $selectedDate,
+        'jadwal_tayang' => $jadwal_tayang
+    ]);
+}
 }

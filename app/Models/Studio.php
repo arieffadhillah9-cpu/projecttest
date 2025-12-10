@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\JadwalTayang;
 
 class Studio extends Model
 {
@@ -25,4 +26,9 @@ class Studio extends Model
     {
         return $this->hasMany(JadwalTayang::class);
     }
+    public function seats()
+    {
+    return $this->hasMany(Seat::class);
+    }
+
 }
