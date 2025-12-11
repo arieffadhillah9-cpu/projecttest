@@ -99,16 +99,25 @@
 
                                         <td>{{ $jadwal->studio->nama }}</td>
 
-                                        <td>{{ $jadwal->tanggal->format('d M Y') }}</td>
+                                        {{-- =============================================
+                                        PERBAIKAN 1: Menggunakan 'waktu_tayang' untuk Tanggal
+                                        ============================================= --}}
+                                        <td>{{ \Carbon\Carbon::parse($jadwal->waktu_tayang)->format('d M Y') }}</td>
 
                                         <td>
                                             <span class="badge badge-info">
-                                                {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} WIB
+                                                {{-- =============================================
+                                                PERBAIKAN 2: Menggunakan 'waktu_tayang' untuk Jam Mulai
+                                                ============================================= --}}
+                                                {{ \Carbon\Carbon::parse($jadwal->waktu_tayang)->format('H:i') }} WIB
                                             </span>
                                         </td>
 
                                         <td>
-                                            Rp {{ number_format($jadwal->harga, 0, ',', '.') }}
+                                            {{-- =============================================
+                                            PERBAIKAN 3: Menggunakan 'harga_tiket'
+                                            ============================================= --}}
+                                            Rp {{ number_format($jadwal->harga_tiket, 0, ',', '.') }}
                                         </td>
 
                                         <td>
@@ -207,7 +216,8 @@
     $(document).ready(function () {
         $('.delete-btn').on('click', function () {
             var id = $(this).data('id');
-            var url = '{{ url('jadwal') }}/' + id;
+            // CATATAN: URL di sini mungkin perlu diubah tergantung routing Anda
+            var url = '{{ url('admin/jadwal') }}/' + id; // Saya asumsikan prefix admin
             $('#deleteForm').attr('action', url);
         });
     });

@@ -121,7 +121,7 @@ public function selectSeat($jadwalId)
 
    public function processPemesanan(Request $request)
 {
-    \Log::info('Proses Pemesanan Dimulai', $request->all());
+     \Log::info('Proses Pemesanan Dimulai', $request->all());
     // A. Validasi (Ini yang paling sering menyebabkan reload tanpa error)
     $request->validate([
         'jadwal_id' => 'required|exists:jadwal_tayangs,id',
@@ -142,7 +142,11 @@ public function selectSeat($jadwalId)
     }
     
     // A.2. DEFINISIKAN HARGA DARI DATABASE
-    $hargaPerKursi = $jadwal->harga; // <<< HARGA DIAMBIL DARI KOLOM 'harga' DI TABEL JADWAL_TAYANG
+    // ***************************************************************
+    // KOREKSI DILAKUKAN DI SINI: Ganti $jadwal->harga menjadi $jadwal->harga_tiket
+    // ***************************************************************
+    $hargaPerKursi = $jadwal->harga_tiket; // <<< KOREKSI: Gunakan kolom 'harga_tiket'
+    
     \Log::info('Harga per Kursi Ditemukan: ' . $hargaPerKursi);
     // -----------------------------------------------------------------
     DB::beginTransaction();

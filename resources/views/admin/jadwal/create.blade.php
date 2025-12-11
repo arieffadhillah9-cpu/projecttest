@@ -135,4 +135,24 @@
         
     </div>
 </div>
+@section('scripts')
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Ambil nilai dari input terpisah
+        const tanggal = document.getElementById('tanggal').value;
+        const jamMulai = document.getElementById('jam_mulai').value;
+        
+        // Buat nilai gabungan (format YYYY-MM-DD HH:MM:00)
+        const waktuTayang = tanggal + ' ' + jamMulai + ':00';
+
+        // Buat input tersembunyi yang akan dikirim ke Controller
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'waktu_tayang'; // <--- Nama ini harus dicari Controller!
+        hiddenInput.value = waktuTayang;
+
+        // Tambahkan input tersembunyi ke dalam form
+        this.appendChild(hiddenInput);
+    });
+</script>
 @endsection
