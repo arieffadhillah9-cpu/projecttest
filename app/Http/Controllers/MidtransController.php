@@ -1,14 +1,12 @@
-// app/Http/Controllers/MidtransController.php
-
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\Pemesanan; // Pastikan model ini ada
 use App\Models\JadwalSeat; // Pastikan model ini ada
 use Midtrans\Config;
 use Midtrans\Notification;
+use Illuminate\Support\Facades\Log; // Pastikan ini ada dan setelah namespace
 
 class MidtransController extends Controller
 {
