@@ -10,13 +10,16 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController; 
 use App\Http\Controllers\HomepageController; 
 use App\Http\Controllers\UserProfileController; 
+use App\Http\Controllers\MidtransController; // <--- TAMBAHKAN INI
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-
+Route::post('/midtrans/callback', [MidtransController::class, 'handleNotification'])
+    ->name('midtrans.notification')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]); // <--- Jaminan tanpa CSRF
 // --- 1. Route Publik/Umum ---
 
 // Route utama sekarang mengarah ke HomepageController@index

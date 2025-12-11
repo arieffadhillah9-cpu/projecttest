@@ -366,6 +366,12 @@ public function confirmPayment($kode_pemesanan)
             'transaction_details' => $transaction_details,
             'item_details'        => $item_details,
             'customer_details'    => $customer_details,
+            // --- TAMBAHKAN URL PENGEMBALIAN INI ---
+            // Pastikan APP_URL di .env sudah diset ke http://127.0.0.1:8000
+            'finish_url' => route('user.history', [], true) . '?status=success&order_id=' . $kode_pemesanan,
+            'unfinish_url' => route('user.pemesanan.show', ['kode_pemesanan' => $kode_pemesanan], true) . '?status=pending',
+            'error_url' => route('user.pemesanan.show', ['kode_pemesanan' => $kode_pemesanan], true) . '?status=error',
+            // ------------------------------------
         ];
 
         try {
