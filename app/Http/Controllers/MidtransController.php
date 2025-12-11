@@ -14,6 +14,9 @@ class MidtransController extends Controller
 {
     public function handleNotification(Request $request)
     {
+        // --- TAMBAHKAN INI SEGERA DI AWAL FUNGSI ---
+    \Log::info('Webhook Midtrans Diterima!', ['data' => $request->all()]);
+    // ---------------------------------------------
         // 1. Konfigurasi Midtrans Server Key
         // PENTING: Gunakan server key untuk verifikasi
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION');
