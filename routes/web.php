@@ -10,13 +10,16 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController; 
 use App\Http\Controllers\HomepageController; 
 use App\Http\Controllers\UserProfileController; 
+use App\Http\Controllers\MidtransController; // <--- TAMBAHKAN INI
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-
+Route::post('/midtrans/callback', [MidtransController::class, 'handleNotification'])
+    ->name('midtrans.notification')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]); // <--- Jaminan tanpa CSRF
 // --- 1. Route Publik/Umum ---
 
 // Route utama sekarang mengarah ke HomepageController@index
@@ -98,8 +101,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/pemesanan/{kode_pemesanan}', [UserProfileController::class, 'showPemesanan'])
         ->name('user.pemesanan.show');
 
-        // Rute untuk memicu update status pembayaran (dari 'menunggu_pembayaran' ke 'paid')
-    Route::post('/user/pemesanan/{kode_pemesanan}/confirm-payment', [PemesananController::class, 'confirmPayment'])
-        ->name('user.pemesanan.confirmPayment');
+   // Rute untuk memanggil Midtrans API dan menghasilkan URL pembayaran
+Route::post('/pemesanan/{kode_pemesanan}/payment', [PemesananController::class, 'generatePayment'])
+    ->name('user.pemesanan.generatePayment');
         
 });
