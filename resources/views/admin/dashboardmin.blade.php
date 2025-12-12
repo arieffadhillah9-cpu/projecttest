@@ -98,6 +98,14 @@
                             </div>
                         </a>
                         
+                          {{-- Menu 4: Dashboard --}}
+                        <a href="{{ route('dashboard.user') }}" class="list-group-item list-group-item-action menu-link-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center py-2">
+                                <h5 class="mb-1"><i class="fas fa-tv mr-3 text-red-strong"></i> Dashboard</h5>
+                                <span class="text-muted"><i class="fas fa-chevron-right"></i></span>
+                            </div>
+                        </a>
+                        
                     </div>
                 </div>
             </div>
