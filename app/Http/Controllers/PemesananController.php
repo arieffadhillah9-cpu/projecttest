@@ -391,4 +391,14 @@ public function confirmPayment($kode_pemesanan)
             return back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
         }
     }
+        public function history()
+    {
+        // Mengambil pemesanan untuk user yang sedang login
+        $pemesanans = Pemesanan::where('user_id', auth()->id())
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+                            
+        return view('user.history', compact('pemesanans')); 
+        // Atau sesuai lokasi file blade Anda, misalnya 'history'
+    }
 }
