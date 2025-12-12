@@ -135,7 +135,7 @@
                         @auth
                         <a href="{{ route('user.pemesanan.select_seat', ['jadwalId' => $jadwal->id]) }}" class="btn btn-primary">Pilih Kursi</a>
                         @else
-                         <a href="{{ route('login') }}" class="btn btn-secondary">Login untuk Pesan</a>
+                         <a href="{{ route('user.login') }}" class="btn btn-secondary">Login untuk Pesan</a>
                         @endauth
                     </div>
                 </div>

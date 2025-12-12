@@ -11,6 +11,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomepageController; 
 use App\Http\Controllers\UserProfileController; 
 use App\Http\Controllers\MidtransController; // <--- TAMBAHKAN INI
+use App\Http\Controllers\Auth\User\UserLoginController;
+use App\Http\Controllers\Auth\User\UserRegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +56,21 @@ Auth::routes();
 // Route yang akan diakses setelah login sukses (default)
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+// =========================================================================
+// 3. ROUTE AUTENTIKASI USER BIASA (MENGGUNAKAN CONTROLLER TERPISAH)
+// =========================================================================
+
+// --- Login & Logout User (Mengarah ke UserLoginController) ---
+Route::get('/user/login', [UserLoginController::class, 'showLoginForm'])->name('user.login.form'); 
+Route::post('/user/login', [UserLoginController::class, 'login'])->name('user.login');
+Route::post('/user/logout', [UserLoginController::class, 'logout'])->name('user.logout');
+
+// --- Register User (Mengarah ke UserRegisterController) ---
+Route::get('/user/register', [UserRegisterController::class, 'showRegistrationForm'])->name('user.register.form'); 
+Route::post('/user/register', [UserRegisterController::class, 'register'])->name('user.register');
+
+
+// 
 
 // --- 3. Kelompok Route ADMIN (Prefix 'admin' dan Name 'admin.') ---
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
