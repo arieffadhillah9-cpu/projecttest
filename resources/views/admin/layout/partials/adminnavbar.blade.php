@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark border-bottom border-danger" style="background-color: #000000 !important;">
     <div class="container-fluid">
         <!-- Brand/Logo -->
-        <a class="navbar-brand text-danger font-weight-bold" href="#">
+        <a class="navbar-brand text-danger font-weight-bold" href="{{ route('admin.dashboardmin') }}">
             <i class="fas fa-ticket-alt"></i> Seatly Admin
         </a>
         

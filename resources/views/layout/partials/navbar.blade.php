@@ -26,17 +26,6 @@
 
                 </li>
 
-                <li class="nav-item">
-
-                    <a class="nav-link text-white" href="#">MOVIES</a>
-
-                </li>
-
-                <li class="nav-item">
-
-                    <a class="nav-link text-white" href="#">TICKET</a>
-
-                </li>
 
                  <li class="nav-item">
 
