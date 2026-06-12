@@ -1,177 +1,82 @@
-
 @extends('layout.app')
 
+@section('title', 'Daftar Akun Baru')
+
 @section('content')
+<div class="min-h-[80vh] flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8 bg-zinc-950/40 border border-zinc-900 rounded-3xl p-8 backdrop-blur-sm shadow-xl shadow-red-950/5 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <!-- Header -->
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20 mb-4">
+                <i class="fas fa-user-plus text-lg"></i>
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight text-white">
+                USER REGISTRATION
+            </h2>
+            <p class="text-xs text-zinc-500 mt-2">Create a new Seatly account to book tickets</p>
+        </div>
 
-<style>
-    /* 1. OVERRIDE ADMINLTE: Memastikan background hitam di semua layer */
-    body, 
-    .wrapper, 
-    .content-wrapper,
-    .main-footer {
-        background-color: #000000 !important;
-        background-image: none !important;
-        border: none !important;
-        margin-left: 0 !important;
-    }
+        <form class="mt-8 space-y-6" method="POST" action="{{ route('user.register') }}">
+            @csrf
 
-    /* 2. Main Wrapper untuk centering vertikal */
-    .main-wrapper {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at center, #111111 0%, #000000 100%);
-    }
+            <div class="space-y-4">
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                    <input id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Your Full Name"
+                           class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300 @error('name') border-red-500 @enderror">
+                    @error('name')
+                        <span class="text-xs text-red-500 mt-1 block">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
 
-    /* 3. Card Register: Dibuat LEBAR (max-width: 750px) agar seragam dengan login */
-    .login-card-minimalist {
-        width: 100%;
-        max-width: 750px; 
-        background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
-        color: #f2f2f2;
-        border: 1px solid #333333;
-        border-radius: 12px;
-        box-shadow: 0 20px 50px rgba(255, 0, 0, 0.15);
-        overflow: hidden;
-    }
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Email Address</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="email@example.com"
+                           class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300 @error('email') border-red-500 @enderror">
+                    @error('email')
+                        <span class="text-xs text-red-500 mt-1 block">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
 
-    /* Header Merah Gelap */
-    .card-header-red {
-        background: linear-gradient(135deg, #b30000, #7a0000);
-        color: #ffffff;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        border-bottom: 2px solid #ff0000;
-        padding: 25px;
-    }
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Password</label>
+                    <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••"
+                           class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300 @error('password') border-red-500 @enderror">
+                    @error('password')
+                        <span class="text-xs text-red-500 mt-1 block">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
 
-    /* Input Field Gelap & Futuristik */
-    .form-control {
-        background-color: #121212 !important;
-        border: 1px solid #444 !important;
-        color: #ffffff !important;
-        border-radius: 8px;
-        padding: 12px 15px;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        border-color: #ff3b3b !important;
-        box-shadow: 0 0 10px rgba(255, 59, 59, 0.3) !important;
-        background-color: #1a1a1a !important;
-    }
-
-    /* Label warna abu terang */
-    .col-form-label {
-        color: #cccccc;
-        font-weight: 500;
-    }
-
-    /* Tombol Register Merah Solid */
-    .bg-red-strong {
-        background: linear-gradient(135deg, #ff3b3b, #8b0000) !important;
-        border: none !important;
-        color: #ffffff !important;
-        padding: 12px 35px;
-        font-weight: 600;
-        border-radius: 50px;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .bg-red-strong:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
-    }
-
-    .text-red-strong {
-        color: #ff3b3b !important;
-    }
-
-    /* Fix text label */
-    .text-md-end {
-        color: #cccccc !important;
-    }
-</style>
-
-<div class="main-wrapper">
-    <div class="container">
-        <div class="row justify-content-center">
-            {{-- Menggunakan lebar kolom yang sama dengan Login (col-lg-9) --}}
-            <div class="col-12 col-md-10 col-lg-9 col-xl-8">
-                <div class="card login-card-minimalist">
-                    
-                    <div class="card-header card-header-red text-center">
-                        <i class="fas fa-user-plus me-2"></i> {{ __('USER REGISTRATION') }}
-                    </div>
-
-                    <div class="card-body p-5">
-                        <form method="POST" action="{{ route('user.register') }}">
-                            @csrf
-
-                            {{-- Name --}}
-                            <div class="row mb-4 align-items-center">
-                                <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Full Name') }}</label>
-                                <div class="col-md-7">
-                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Your Full Name">
-                                    @error('name')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong class="text-red-strong">{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            {{-- Email Address --}}
-                            <div class="row mb-4 align-items-center">
-                                <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-                                <div class="col-md-7">
-                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="email@example.com">
-                                    @error('email')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong class="text-red-strong">{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            {{-- Password --}}
-                            <div class="row mb-4 align-items-center">
-                                <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-                                <div class="col-md-7">
-                                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="••••••••">
-                                    @error('password')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong class="text-red-strong">{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            {{-- Confirm Password --}}
-                            <div class="row mb-4 align-items-center">
-                                <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-                                <div class="col-md-7">
-                                    <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••">
-                                </div>
-                            </div>
-
-                            <div class="row mb-0 mt-4">
-                                <div class="col-md-7 offset-md-4 d-flex align-items-center">
-                                    <button type="submit" class="btn bg-red-strong me-3">
-                                        <i class="fas fa-user-check me-2"></i> {{ __('Register Now') }}
-                                    </button>
-                                    
-            
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                <!-- Confirm Password -->
+                <div>
+                    <label for="password-confirm" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Konfirmasi Password</label>
+                    <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••"
+                           class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300">
                 </div>
             </div>
-        </div>
+
+            <!-- Submit -->
+            <div>
+                <button type="submit" class="w-full text-center py-4 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-xl transition-all duration-300 shadow-md shadow-red-950/40 active:scale-95 cursor-pointer">
+                    <i class="fas fa-user-check mr-2"></i> Register Now
+                </button>
+            </div>
+            
+            <div class="text-center text-xs text-zinc-500 mt-4">
+                Sudah punya akun? <a href="{{ route('user.login.form') }}" class="text-rose-500 hover:underline">Log in disini</a>
+            </div>
+        </form>
     </div>
 </div>
-
 @endsection

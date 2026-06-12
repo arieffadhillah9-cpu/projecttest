@@ -1,172 +1,105 @@
 @extends('layout.app')
 
+@section('title', 'Riwayat Pesanan')
+
 @section('content')
+<div class="min-h-screen bg-black py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <a href="{{ route('dashboard.user') }}" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-200 mb-4 group">
+                    <i class="fas fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Kembali ke Dashboard
+                </a>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fas fa-history text-rose-500"></i> Riwayat Pesanan
+                </h1>
+            </div>
+        </div>
 
-<style>
-    /* Global Background Override */
-    body, .wrapper, .content-wrapper {
-        background-color: #000000 !important;
-        color: #e0e0e0 !important;
-    }
+        @if($pemesanans->isEmpty())
+            <div class="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/20">
+                <i class="fas fa-info-circle text-4xl text-zinc-700 mb-4"></i>
+                <h3 class="text-lg font-semibold text-zinc-400">Belum ada transaksi</h3>
+                <p class="text-sm text-zinc-600 mt-1">Anda belum melakukan pemesanan tiket apa pun saat ini.</p>
+            </div>
+        @else
+            <!-- Modern Card Wrapper -->
+            <div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl overflow-hidden backdrop-blur-sm shadow-xl shadow-red-950/5">
+                <div class="p-6 border-b border-zinc-900/60 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold tracking-tight text-zinc-300">Transaksi Terkini</h3>
+                    <span class="text-xs text-zinc-500 font-light">Menampilkan {{ $pemesanans->count() }} item</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-zinc-900 bg-zinc-950/50">
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">ID Pesanan</th>
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Film & Studio</th>
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Jadwal</th>
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Total Harga</th>
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                                <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-900/40 text-sm">
+                            @foreach ($pemesanans as $pemesanan)
+                                <tr class="hover:bg-zinc-900/20 transition-colors duration-150">
+                                    <td class="px-6 py-4 font-mono text-xs text-zinc-400 font-medium">
+                                        {{ $pemesanan->kode_pemesanan }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="font-semibold text-zinc-200 block tracking-tight">{{ $pemesanan->jadwal->film->judul ?? 'N/A' }}</span>
+                                        <span class="text-xs text-rose-500 font-medium">Studio {{ $pemesanan->jadwal->studio->nama ?? 'N/A' }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-zinc-400 font-light">
+                                        {{ \Carbon\Carbon::parse($pemesanan->jadwal->waktu_tayang)->format('d/m/y H:i') }}
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-zinc-100">
+                                        Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @php
+                                            $statusBadge = [
+                                                'paid' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                                'menunggu_pembayaran' => 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+                                                'expired' => 'bg-zinc-900 text-zinc-500 border-zinc-800',
+                                                'canceled' => 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+                                            ][$pemesanan->status] ?? 'bg-zinc-800 text-zinc-300 border-zinc-700';
+                                            
+                                            $statusText = [
+                                                'paid' => 'Lunas',
+                                                'menunggu_pembayaran' => 'Pending',
+                                                'expired' => 'Expired',
+                                                'canceled' => 'Batal',
+                                            ][$pemesanan->status] ?? strtoupper($pemesanan->status);
+                                        @endphp
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border {{ $statusBadge }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <a href="{{ route('user.pemesanan.show', $pemesanan->kode_pemesanan) }}" 
+                                           class="inline-flex items-center justify-center px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-full transition-all duration-300 active:scale-95 shadow-md shadow-red-950/20">
+                                            Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-    /* Page Header */
-    .content-header h1 {
-        font-weight: 800;
-        text-transform: uppercase;
-        color: #ffffff !important;
-        font-size: 1.5rem;
-    }
-    
-    .breadcrumb-item a { color: #ff3b3b !important; }
-
-    /* Card Ramping (Dikecilkan) */
-    .card-modern {
-        background: #111111 !important;
-        border: 1px solid #333 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-        overflow: hidden;
-        /* Mengontrol lebar maksimal card */
-        max-width: 950px; 
-        margin: 0 auto;
-    }
-
-    .card-modern .card-header {
-        background: linear-gradient(135deg, #b30000, #660000) !important;
-        border-bottom: 2px solid #ff0000 !important;
-        padding: 1rem 1.5rem;
-    }
-
-    /* Table Styling */
-    .table-dark-custom {
-        background-color: transparent !important;
-        margin-bottom: 0;
-        font-size: 0.9rem; /* Ukuran font tabel diperkecil sedikit agar proporsional */
-    }
-
-    .table-dark-custom thead th {
-        background-color: #1a1a1a !important;
-        border-bottom: 1px solid #333 !important;
-        color: #ff3b3b !important;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        padding: 12px;
-    }
-
-    .table-dark-custom td {
-        padding: 12px !important;
-        vertical-align: middle !important;
-    }
-
-    .btn-detail {
-        background: linear-gradient(135deg, #ff3b3b, #b30000);
-        border: none;
-        color: white;
-        border-radius: 6px;
-        padding: 5px 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: 0.3s;
-    }
-
-    .btn-detail:hover {
-        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-        color: white;
-    }
-</style>
-
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-3 justify-content-center">
-            <div class="col-md-10" style="max-width: 950px;"> {{-- Menyelaraskan header dengan lebar card --}}
-                <div class="d-flex justify-content-between align-items-center">
-                    <h1 class="m-0"><i class="fas fa-history mr-2 text-red"></i> Riwayat Pesanan</h1>
-                    <ol class="breadcrumb float-sm-right bg-transparent p-0 m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard.user') }}">Home</a></li>
-                        <li class="breadcrumb-item active text-gray">Riwayat</li>
-                    </ol>
+                <div class="px-6 py-4 border-t border-zinc-900 bg-zinc-950/20 flex items-center justify-end">
+                    <div class="text-zinc-500 text-xs">
+                        {{ $pemesanans->links() }}
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        @endif
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-10"> {{-- Grid pembungkus card --}}
-                
-                @if($pemesanans->isEmpty())
-                    <div class="alert bg-dark border border-secondary text-warning p-4 mx-auto" style="max-width: 950px;">
-                        <h5><i class="icon fas fa-info-circle"></i> Kosong</h5>
-                        Belum ada riwayat transaksi.
-                    </div>
-                @else
-                    <div class="card card-modern">
-                        <div class="card-header">
-                            <h3 class="card-title" style="font-size: 1rem;"><i class="fas fa-list-ul mr-2"></i> Transaksi Terkini</h3>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-dark-custom">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Film & Studio</th>
-                                            <th>Jadwal</th>
-                                            <th>Total</th>
-                                            <th>Status</th>
-                                            <th class="text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($pemesanans as $pemesanan)
-                                            <tr>
-                                                <td class="text-white small">{{ $pemesanan->kode_pemesanan }}</td>
-                                                <td>
-                                                    <b class="text-white d-block">{{ $pemesanan->jadwal->film->judul ?? 'N/A' }}</b>
-                                                    <small class="text-info">Studio {{ $pemesanan->jadwal->studio->nama ?? 'N/A' }}</small>
-                                                </td>
-                                                <td class="small">
-                                                    {{ \Carbon\Carbon::parse($pemesanan->jadwal->waktu_tayang)->format('d/m/y H:i') }}
-                                                </td>
-                                                <td class="text-danger font-weight-bold">
-                                                    Rp{{ number_format($pemesanan->total_harga, 0, ',', '.') }}
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $statusClass = [
-                                                            'paid' => 'bg-success',
-                                                            'pending' => 'bg-warning text-dark',
-                                                            'expired' => 'bg-danger',
-                                                            'canceled' => 'bg-secondary',
-                                                        ][$pemesanan->status] ?? 'bg-info';
-                                                    @endphp
-                                                    <span class="badge {{ $statusClass }}" style="font-size: 0.65rem;">
-                                                        {{ strtoupper($pemesanan->status) }}
-                                                    </span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <a href="{{ route('user.pemesanan.show', $pemesanan->kode_pemesanan) }}" class="btn btn-detail">
-                                                        DETAIL
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent border-top border-dark">
-                            <div class="float-right">
-                                {{ $pemesanans->links() }}
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-            </div>
-        </div>
     </div>
 </div>
 @endsection

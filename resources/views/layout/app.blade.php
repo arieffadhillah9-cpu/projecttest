@@ -1,55 +1,45 @@
 <!DOCTYPE html>
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
-<html lang="en">
+<html lang="id" class="dark scroll-smooth">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Seatly</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>@yield('title', 'Seatly - Premium Cinema Ticket Booking')</title>
 
-  @include('layout.partials.style')
+  <!-- Google Fonts: Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Instrument+Sans:400,500,600,700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS & Vite scripts -->
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+  @yield('styles')
+  @stack('styles')
 </head>
   
-<body class="hold-transition sidebar-collapse bg-dark">
-  <div class="wrapper">
-    <!-- Navbar -->
-            @include('layout.partials.navbar')
-    <!-- /Navbar -->
-     <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-           
-        </aside>
+<body class="bg-black text-zinc-100 font-sans min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
+  
+  <!-- Navbar -->
+  @include('layout.partials.navbar')
+  <!-- /Navbar -->
 
-    <!-- Main Sidebar Container -->
-    
+  <!-- Main Content Wrapper -->
+  <main class="flex-grow pt-16">
+    @yield('content')
+  </main>
+  <!-- /Main Content Wrapper -->
 
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
-      @yield('content')
-    </div>
-      <!-- /.content-wrapper -->
+  <!-- Footer -->
+  <footer class="bg-black/80 border-t border-zinc-900/50 backdrop-blur-md py-8">
+    @include('layout.partials.footer')
+  </footer>
+  <!-- /Footer -->
 
-      <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-        <div class="p-3">
-          <h5>Title</h5>
-          <p>Sidebar content</p>
-        </div>
-      </aside>
-      <!-- /.control-sidebar -->
-      <!-- Main Footer -->
-      <footer class="main-footer bg-dark text-white border-top-0" style="background-color: #000000 !important; padding: 20px 0;">
-        <!-- To the right -->
-       @include('layout.partials.footer')
-      </footer>
-  </div>
-      <!-- ./wrapper -->
-       <!-- jQuery -->
-       @include('layout.partials.script')
-      <!-- REQUIRED SCRIPTS -->
-     
+  <!-- Custom Scripts -->
+  @stack('scripts')
 </body>
 </html>

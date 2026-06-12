@@ -1,147 +1,75 @@
 @extends('layout.app')
 
-@section('title', 'Jadwal Tayang Film')
+@section('title', 'Jadwal Tayang - ' . $film->judul)
 
 @section('content')
-
-<style>
-/* ===== WRAPPER ===== */
-.jadwal-wrapper {
-    padding: 100px 0;
-    background: linear-gradient(180deg, #0b0b0b 0%, #000000 100%);
-    min-height: 95vh;
-    color: #fff;
-}
-
-/* ===== TITLE ===== */
-.jadwal-title {
-    font-weight: 700;
-    font-size: 3rem;
-    margin-bottom: 20px;
-    color: #ff3b3b;
-    text-shadow: 0 0 10px rgba(255,0,0,0.4);
-}
-
-.jadwal-subtitle {
-    color: #ddd;
-    font-size: 1.1rem;
-}
-
-/* ===== CARD LIST ===== */
-.list-group-item {
-    background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%) !important;
-    border: 1px solid rgba(255, 0, 0, 0.25) !important;
-    border-radius: 14px !important;
-    padding: 22px !important;
-    margin-bottom: 25px;
-    transition: 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.list-group-item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at top left, rgba(255,0,0,0.08), transparent 60%);
-    pointer-events: none;
-}
-
-.list-group-item:hover {
-    transform: translateY(-4px) scale(1.01);
-    border-color: #ff3b3b !important;
-    box-shadow: 0 0 25px rgba(255, 0, 0, 0.35);
-}
-
-.list-group-item h5 {
-    font-size: 1.35rem;
-    color: #ff4d4d;
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(255,0,0,0.3);
-}
-
-.list-group-item p {
-    color: #ccc;
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-top: 4px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #d60000, #ff1b1b) !important;
-    border: none !important;
-    padding: 12px 26px;
-    border-radius: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: 0.25s ease;
-} {
-    background: linear-gradient(90deg, #d60000, #ff1b1b) !important;
-    border: none !important;
-    padding: 10px 22px;
-    border-radius: 10px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    transition: 0.25s;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(90deg, #ff2424, #ff4d4d) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(255,0,0,0.35);
-}
-
-.btn-secondary {
-    background: #333 !important;
-    border: 1px solid #555 !important;
-    padding: 10px 22px;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: 0.2s;
-}
-
-.btn-secondary:hover {
-    background: #444 !important;
-}
-</style>
-
-<div class="jadwal-wrapper">
-<div class="container">
-    <h2 class="jadwal-title">Jadwal Tayang: {{ $film->judul }}</h2>
-    <p class="jadwal-subtitle">Pilih jadwal di bawah untuk memulai pemesanan tiket.</p>
-
-    @if($jadwalTayang->isEmpty())
-
-     <div class="alert alert-warning mt-4">
-            Maaf, belum ada jadwal tayang tersedia untuk film ini.
+<div class="min-h-screen bg-black py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-12">
+            <a href="{{ route('dashboard.user') }}" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-200 mb-6 group">
+                <i class="fas fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Kembali ke Dashboard
+            </a>
+            
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                Jadwal Tayang: <span class="bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">{{ $film->judul }}</span>
+            </h1>
+            <p class="text-sm text-zinc-400 mt-2 font-light">Pilih jadwal tayang di bawah untuk memulai pemesanan tiket Anda.</p>
         </div>
-    @else
-    <div class="list-group mt-4">
-            @foreach ($jadwalTayang as $jadwal)
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-2">Studio {{ $jadwal->studio->nama }}</h5>
-                        <p class="mb-1">
-                            Tanggal: <strong>{{ \Carbon\Carbon::parse($jadwal->tanggal_tayang)->format('d M Y') }}</strong><br>
-                            Jam Mulai: <strong>{{ $jadwal->jam_mulai }}</strong><br>
-                            Harga: <strong>Rp {{ number_format($jadwal->harga_tiket) }}</strong>
-                        </p>
+
+        @if($jadwalTayang->isEmpty())
+            <div class="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/20">
+                <i class="fas fa-calendar-times text-4xl text-zinc-700 mb-4"></i>
+                <h3 class="text-lg font-semibold text-zinc-400">Belum ada jadwal tayang.</h3>
+                <p class="text-sm text-zinc-600 mt-1">Maaf, belum ada jadwal tayang tersedia untuk film ini saat ini.</p>
+            </div>
+        @else
+            <div class="space-y-6">
+                @foreach ($jadwalTayang as $jadwal)
+                    <div class="relative overflow-hidden bg-zinc-950/40 border border-zinc-900/60 rounded-2xl p-6 transition-all duration-300 hover:border-zinc-800 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-500/5 backdrop-blur-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                        <!-- Left Details -->
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-rose-500 bg-rose-500/10 rounded-full border border-rose-500/20">
+                                    Studio {{ $jadwal->studio->nama }}
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4 text-sm">
+                                <div>
+                                    <span class="text-xs text-zinc-500 block">Tanggal</span>
+                                    <span class="font-medium text-zinc-200">{{ \Carbon\Carbon::parse($jadwal->tanggal_tayang)->format('d M Y') }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-zinc-500 block">Jam Mulai</span>
+                                    <span class="font-medium text-zinc-200">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} WIB</span>
+                                </div>
+                                <div class="col-span-2 sm:col-span-1">
+                                    <span class="text-xs text-zinc-500 block">Harga Tiket</span>
+                                    <span class="font-bold text-rose-500">Rp {{ number_format($jadwal->harga_tiket, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="w-full sm:w-auto shrink-0 flex items-center justify-end">
+                            @auth
+                                <a href="{{ route('user.pemesanan.select_seat', ['jadwalId' => $jadwal->id]) }}" 
+                                   class="w-full sm:w-auto text-center px-6 py-3 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-full transition-all duration-300 shadow-md shadow-red-950/40 active:scale-95">
+                                    Pilih Kursi
+                                </a>
+                            @else
+                                <a href="{{ route('user.login') }}" 
+                                   class="w-full sm:w-auto text-center px-6 py-3 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 rounded-full transition-all duration-300 active:scale-95">
+                                    Login untuk Pesan
+                                </a>
+                            @endauth
+                        </div>
                     </div>
-                    <div>
-                        @auth
-                        <a href="{{ route('user.pemesanan.select_seat', ['jadwalId' => $jadwal->id]) }}" class="btn btn-primary">Pilih Kursi</a>
-                        @else
-                         <a href="{{ route('user.login') }}" class="btn btn-secondary">Login untuk Pesan</a>
-                        @endauth
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
-</div>
+                @endforeach
+            </div>
+        @endif
+    </div>
 </div>
 @endsection

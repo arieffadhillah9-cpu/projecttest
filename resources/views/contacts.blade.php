@@ -3,175 +3,107 @@
 @section('title', 'Hubungi Kami')
 
 @section('content')
-<style>
-   
-    .content-wrapper {
-        background-color: #1a1a1a !important;
-    }
-    body {
-        background-color: #1a1a1a !important;
-    }
-
-    .contact-section {
-        background-color: transparent; 
-        /* [FIX 1: JARAK DARI NAVBAR] Menambah padding atas agar tidak terlalu mepet Navbar */
-        padding-top: 100px; 
-        padding-bottom: 150px; 
-        min-height: 100vh;
-        color: #ffffff; 
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* [FIX 3: INPUT TEXT] Memastikan teks input selalu putih, terutama saat fokus */
-    .form-control {
-        background-color: #333333; /* Warna field saat tidak aktif */
-        border: 1px solid #555555;
-        color: #ffffff !important; /* Warna teks yang diketik (Putih) */
-        border-radius: 8px;
-        padding: 10px 15px;
-        max-width: 100%; 
-        width: 100%;
-        box-sizing: border-box; 
-    }
-    .form-control:focus {
-        background-color: #444444; /* Warna field saat aktif */
-        border-color: #dc3545; /* Border saat aktif */
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.4);
-        color: #ffffff !important; /* SANGAT PENTING: Memastikan teks tetap putih saat input aktif */
-    }
-
-    /* Styling Lainnya */
-    .card-contact {
-        /* Kotak hitam utama */
-        background-color: #000000;
-        border: 1px solid #333333; 
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.15); 
-    }
-    .contact-section header h1 {
-        color: #dc3545 !important;
-    }
-    .contact-section header p {
-        color: #cccccc;
-    }
-    .info-list i {
-        color: #dc3545;
-        min-width: 25px;
-    }
-    .info-list a {
-        color: #ffffff;
-        transition: color 0.3s;
-    }
-    .info-list a:hover {
-        color: #dc3545;
-        text-decoration: none;
-    }
-    .form-group label {
-        color: #cccccc;
-        font-weight: 500;
-        margin-bottom: 5px;
-    }
-    .border-right-custom {
-        border-right: 1px solid #444444 !important;
-    }
-    @media (max-width: 767px) {
-        .border-right-custom {
-            border-right: none !important;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #444444 !important;
-        }
-    }
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        transition: background-color 0.3s, transform 0.2s;
-        border-radius: 8px;
-        font-size: 1rem;
-        padding: 12px;
-    }
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-        transform: translateY(-2px);
-    }
-</style>
-
-<div class="container contact-section">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <header class="text-center mb-5">
-                <h1 class="font-weight-bolder">PUSAT BANTUAN SEATLY CINEMA</h1>
-                <p class="lead">Kami di sini untuk mendengarkan. Sampaikan pertanyaan, saran, atau masukan Anda di bawah ini.</p>
-            </header>
-            
-            <div class="card card-contact">
-                <div class="card-body p-md-5">
+<div class="min-h-screen bg-black py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white uppercase">
+                Pusat Bantuan <span class="bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">Seatly Cinema</span>
+            </h1>
+            <p class="text-sm sm:text-base text-zinc-400 mt-4 max-w-2xl mx-auto font-light">
+                Kami di sini untuk mendengarkan. Sampaikan pertanyaan, saran, atau masukan Anda di bawah ini.
+            </p>
+        </div>
+        
+        <!-- Card Wrapper -->
+        <div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 sm:p-10 backdrop-blur-sm shadow-xl shadow-red-950/5">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+                
+                <!-- Left Details: Office Info -->
+                <div class="md:col-span-5 space-y-8 md:border-r md:border-zinc-900/80 md:pr-10">
+                    <h2 class="text-lg font-bold text-rose-500 flex items-center gap-2">
+                        <i class="fas fa-headset"></i> Kunjungi Kami
+                    </h2>
                     
-                    <div class="row">
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-4">
+                            <i class="fas fa-map-marker-alt text-rose-500 mt-1 text-lg shrink-0"></i>
+                            <div>
+                                <span class="text-xs text-zinc-500 block font-medium">Alamat Kantor Pusat</span>
+                                <span class="text-sm text-zinc-200 mt-1 block font-light">Jl. Teater Megah No. 50, Jakarta Pusat</span>
+                            </div>
+                        </li>
                         
-                        <!-- Informasi Kontak & Ikon -->
-                        <div class="col-md-5 border-right-custom pr-md-4">
-                            <h4 class="text-danger mb-4"><i class="fas fa-headset mr-2"></i> Kunjungi Kami</h4>
-                            <ul class="list-unstyled info-list">
-                                <li class="mb-4 d-flex align-items-start">
-                                    <i class="fas fa-map-marker-alt mr-3 mt-1 fa-lg"></i> 
-                                    <div>
-                                        <strong class="text-white">Alamat Kantor Pusat:</strong><br>
-                                        Jl. Teater Megah No. 50, Jakarta Pusat
-                                    </div>
-                                </li>
-                                <li class="mb-4 d-flex align-items-start">
-                                    <i class="fas fa-envelope mr-3 mt-1 fa-lg"></i> 
-                                    <div>
-                                        <strong class="text-white">Email Layanan Pelanggan:</strong><br>
-                                        <a href="mailto:seatlycinema@gmail.com">seatlycinema@gmail.com</a>
-                                    </div>
-                                </li>
-                                <li class="mb-4 d-flex align-items-start">
-                                    <i class="fas fa-phone-alt mr-3 mt-1 fa-lg"></i> 
-                                    <div>
-                                        <strong class="text-white">Telepon (Bebas Pulsa):</strong><br>
-                                        0800-FILM-NOW (0800-3456-669)
-                                    </div>
-                                </li>
-                                <li class="mb-4 d-flex align-items-start">
-                                    <i class="fab fa-instagram mr-3 mt-1 fa-lg"></i> 
-                                    <div>
-                                        <strong class="text-white">Ikuti Kami di Instagram:</strong><br>
-                                        <a href="https://www.instagram.com/seatlycinema" target="_blank">@seatlycinema</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+                        <li class="flex items-start gap-4">
+                            <i class="fas fa-envelope text-rose-500 mt-1 text-lg shrink-0"></i>
+                            <div>
+                                <span class="text-xs text-zinc-500 block font-medium">Email Layanan Pelanggan</span>
+                                <a href="mailto:seatlycinema@gmail.com" class="text-sm text-zinc-200 mt-1 block font-light hover:text-rose-400 transition-colors duration-200">
+                                    seatlycinema@gmail.com
+                                </a>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-4">
+                            <i class="fas fa-phone-alt text-rose-500 mt-1 text-lg shrink-0"></i>
+                            <div>
+                                <span class="text-xs text-zinc-500 block font-medium">Telepon (Bebas Pulsa)</span>
+                                <span class="text-sm text-zinc-200 mt-1 block font-light">0800-FILM-NOW (0800-3456-669)</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-4">
+                            <i class="fab fa-instagram text-rose-500 mt-1 text-lg shrink-0"></i>
+                            <div>
+                                <span class="text-xs text-zinc-500 block font-medium">Ikuti Kami di Instagram</span>
+                                <a href="https://www.instagram.com/seatlycinema" target="_blank" class="text-sm text-zinc-200 mt-1 block font-light hover:text-rose-400 transition-colors duration-200">
+                                    @seatlycinema
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
 
-                        <!-- Formulir Pesan -->
-                        <div class="col-md-7 pl-md-5">
-                            <h4 class="text-danger mb-4"><i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Langsung</h4>
-                            <form action="#" method="POST">
-                                @csrf 
-                                <div class="form-group">
-                                    <label for="name">Nama Lengkap</label>
-                                    <input type="text" class="form-control" id="name" name="name" required placeholder="Cth: Budi Santoso">
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Alamat Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required placeholder="Cth: budi@email.com">
-                                </div>
-                                <div class="form-group">
-                                    <label for="subject">Subjek / Topik Bantuan</label>
-                                    <input type="text" class="form-control" id="subject" name="subject" required placeholder="Cth: Permintaan Refund Tiket">
-                                </div>
-                                <div class="form-group">
-                                    <label for="message">Pesan Anda</label>
-                                    <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Tuliskan pesan Anda secara rinci di sini..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-danger btn-block mt-5 font-weight-bold">
-                                    <i class="fas fa-share-square mr-2"></i> KIRIM PERMINTAAN BANTUAN
-                                </button>
-                            </form>
+                <!-- Right Details: Contact Form -->
+                <div class="md:col-span-7">
+                    <h2 class="text-lg font-bold text-rose-500 flex items-center gap-2 mb-6">
+                        <i class="fas fa-paper-plane"></i> Kirim Pesan Langsung
+                    </h2>
+                    
+                    <form action="#" method="POST" class="space-y-6">
+                        @csrf 
+                        
+                        <div>
+                            <label for="name" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                            <input type="text" id="name" name="name" required placeholder="Cth: Budi Santoso"
+                                   class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300">
                         </div>
-                    </div>
+                        
+                        <div>
+                            <label for="email" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Alamat Email</label>
+                            <input type="email" id="email" name="email" required placeholder="Cth: budi@email.com"
+                                   class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300">
+                        </div>
+                        
+                        <div>
+                            <label for="subject" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Subjek / Topik Bantuan</label>
+                            <input type="text" id="subject" name="subject" required placeholder="Cth: Permintaan Refund Tiket"
+                                   class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300">
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Pesan Anda</label>
+                            <textarea id="message" name="message" rows="5" required placeholder="Tuliskan pesan Anda secara rinci di sini..."
+                                      class="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all duration-300 resize-none"></textarea>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <button type="submit" class="w-full text-center py-4 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-xl transition-all duration-300 shadow-md shadow-red-950/40 active:scale-95 cursor-pointer">
+                                <i class="fas fa-share-square mr-2"></i> Kirim Permintaan Bantuan
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

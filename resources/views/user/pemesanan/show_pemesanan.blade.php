@@ -1,207 +1,144 @@
-{{-- resources/views/user/pemesanan/show_pemesanan.blade.php --}}
-
-@extends('layout.dashboard') 
+@extends('layout.app') 
 
 @section('title', 'Detail Pembayaran')
 
 @section('content')
-<style>
-    /* Global Background & Text */
-    body, .wrapper, .content-wrapper {
-        background-color: #000000 !important;
-        color: #e0e0e0 !important;
-    }
-
-    /* Card Styling - Ramping dan Elegan */
-    .card-payment {
-        background: #111111 !important;
-        border: 1px solid #333 !important;
-        border-radius: 15px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-        max-width: 850px;
-        margin: 2rem auto;
-        overflow: hidden;
-    }
-
-    .card-payment .card-header {
-        background: linear-gradient(135deg, #b30000, #660000) !important;
-        border-bottom: 2px solid #ff0000 !important;
-        padding: 1.25rem;
-    }
-
-    .card-payment .card-header h6 {
-        color: #ffffff !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    /* List Group Custom */
-    .list-group-item-dark {
-        background-color: #1a1a1a !important;
-        border-color: #333 !important;
-        color: #ccc !important;
-    }
-
-    .list-group-item-dark strong {
-        color: #ffffff;
-    }
-
-    /* Alert & Section Titles */
-    h5 {
-        color: #ff3b3b;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
-
-    .bill-box {
-        background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
-        border: 1px solid #ff3b3b;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-    }
-
-    .bill-box h3 {
-        color: #ff3b3b;
-        font-weight: 800;
-        margin-top: 10px;
-    }
-
-    /* Buttons */
-    .btn-red {
-        background: linear-gradient(135deg, #ff3b3b, #b30000);
-        border: none;
-        color: white;
-        font-weight: 700;
-        padding: 10px 25px;
-        border-radius: 8px;
-        transition: 0.3s;
-    }
-
-    .btn-red:hover:not(:disabled) {
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
-        transform: translateY(-2px);
-        color: white;
-    }
-
-    .btn-red:disabled {
-        background: #444;
-        color: #888;
-    }
-
-    .btn-outline-gray {
-        border: 1px solid #444;
-        color: #aaa;
-        background: transparent;
-        border-radius: 8px;
-        padding: 10px 25px;
-    }
-
-    .btn-outline-gray:hover {
-        background: #222;
-        color: #fff;
-    }
-
-    #countdown-timer {
-        font-family: 'Courier New', Courier, monospace;
-        font-weight: bold;
-        background: #b30000;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-    }
-</style>
-
-<div class="container-fluid">
-    <div class="card card-payment">
-        <div class="card-header">
-            <h6><i class="fas fa-receipt mr-2"></i> Detail Transaksi #{{ $pemesanan->kode_pemesanan }}</h6>
+<div class="min-h-screen bg-black py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <a href="{{ route('user.history') }}" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-200 mb-4 group">
+                    <i class="fas fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Riwayat Pesanan
+                </a>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fas fa-receipt text-rose-500"></i> Detail Transaksi <span class="text-zinc-500 text-lg sm:text-xl font-medium">#{{ $pemesanan->kode_pemesanan }}</span>
+                </h1>
+            </div>
         </div>
-        <div class="card-body p-4">
+
+        @if (session('success'))
+            <div class="mb-6 p-4 bg-emerald-950/20 border border-emerald-900/40 rounded-2xl text-sm text-emerald-400 flex items-center gap-3">
+                <i class="fas fa-check-circle text-base"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="mb-6 p-4 bg-red-950/20 border border-red-900/40 rounded-2xl text-sm text-red-400 flex items-center gap-3">
+                <i class="fas fa-exclamation-circle text-base"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             
-            @if (session('success'))
-                <div class="alert alert-success bg-success text-white border-0">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger bg-danger text-white border-0">{{ session('error') }}</div>
-            @endif
-            
-            <div class="row">
-                <div class="col-md-6 border-right border-secondary">
+            <!-- Left Details -->
+            <div class="md:col-span-7 space-y-8">
+                
+                <!-- Status Box -->
+                <div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 backdrop-blur-sm">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Status Pembayaran</h3>
                     
-                    {{-- 1. STATUS PEMBAYARAN --}}
                     @if ($pemesanan->status === 'menunggu_pembayaran')
-                        <h5>Waktu Pembayaran</h5>
-                        <p class="text-white">
-                            Batas: 
-                            <span id="countdown-timer" data-expires="{{ $waktuKadaluwarsa->timestamp }}">
-                                {{ $waktuKadaluwarsa->format('H:i:s') }}
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                Menunggu Pembayaran
                             </span>
-                        </p>
-                    @elseif ($pemesanan->status === 'paid')
-                        <h5 class="text-success"><i class="fas fa-check-circle mr-1"></i> SUDAH DIBAYAR</h5>
-                        <p class="small">Waktu: {{ \Carbon\Carbon::parse($pemesanan->waktu_pembayaran)->format('H:i, d M Y') }}</p>
-                    @elseif ($pemesanan->status === 'expired')
-                        <h5 class="text-warning"><i class="fas fa-times-circle mr-1"></i> KADALUWARSA</h5>
-                        <p class="small text-muted">Batas waktu telah berakhir.</p>
-                    @else
-                        <h5 class="text-muted">STATUS: {{ strtoupper($pemesanan->status) }}</h5>
-                    @endif
-                    
-                    <h5 class="mt-4">Detail Film</h5>
-                    <div class="list-group">
-                        <div class="list-group-item list-group-item-dark">
-                            <small class="text-red d-block">Judul Film</small>
-                            <strong>{{ $pemesanan->jadwal->film->judul }}</strong>
+                            <div class="text-sm">
+                                Batas Waktu: 
+                                <span id="countdown-timer" data-expires="{{ $waktuKadaluwarsa->timestamp }}" class="font-mono bg-red-600/15 border border-red-500/25 text-red-400 font-bold px-2 py-0.5 rounded">
+                                    {{ $waktuKadaluwarsa->format('H:i:s') }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="list-group-item list-group-item-dark">
-                            <small class="text-red d-block">Studio & Jadwal</small>
-                            {{ $pemesanan->jadwal->studio->nama }} | {{ \Carbon\Carbon::parse($pemesanan->jadwal->tanggal)->format('d M Y') }} ({{ $pemesanan->jadwal->jam_mulai }})
+                    @elseif ($pemesanan->status === 'paid')
+                        <div class="space-y-1">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <i class="fas fa-check-circle"></i> Sudah Dibayar
+                            </span>
+                            <p class="text-xs text-zinc-500 pt-2">Waktu Pembayaran: {{ \Carbon\Carbon::parse($pemesanan->waktu_pembayaran)->format('H:i, d M Y') }}</p>
+                        </div>
+                    @elseif ($pemesanan->status === 'expired')
+                        <div class="space-y-1">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-zinc-500 border border-zinc-800">
+                                <i class="fas fa-times-circle"></i> Kadaluwarsa
+                            </span>
+                            <p class="text-xs text-zinc-500 pt-2">Batas waktu pembayaran telah berakhir.</p>
+                        </div>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-zinc-700">
+                            {{ strtoupper($pemesanan->status) }}
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Film & Studio Details -->
+                <div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 backdrop-blur-sm space-y-6">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Detail Tiket</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="border-b border-zinc-900/60 pb-4">
+                            <span class="text-xs text-zinc-500 block">Judul Film</span>
+                            <strong class="text-base text-white tracking-tight font-semibold mt-0.5 block">{{ $pemesanan->jadwal->film->judul }}</strong>
+                        </div>
+                        <div class="border-b border-zinc-900/60 pb-4">
+                            <span class="text-xs text-zinc-500 block">Studio & Jadwal</span>
+                            <span class="text-sm text-zinc-200 font-medium mt-0.5 block">
+                                Studio {{ $pemesanan->jadwal->studio->nama }} &bull; {{ \Carbon\Carbon::parse($pemesanan->jadwal->tanggal)->format('d M Y') }} ({{ $pemesanan->jadwal->jam_mulai }})
+                            </span>
                         </div>
                         
                         @php
                             $daftar_kursi = $pemesanan->detailPemesanan->pluck('nomor_kursi')->implode(', ');
                         @endphp
-                        <div class="list-group-item list-group-item-dark">
-                            <small class="text-red d-block">Nomor Kursi ({{ $pemesanan->jumlah_tiket }} Tiket)</small>
-                            <strong>{{ $daftar_kursi }}</strong>
+                        <div>
+                            <span class="text-xs text-zinc-500 block">Nomor Kursi ({{ $pemesanan->jumlah_tiket }} Tiket)</span>
+                            <strong class="text-base text-rose-500 font-bold tracking-wider mt-0.5 block">{{ $daftar_kursi }}</strong>
                         </div>
                     </div>
                 </div>
+
+            </div>
+
+            <!-- Right Column (Checkout/Invoice) -->
+            <div class="md:col-span-5 space-y-6">
                 
-                <div class="col-md-6 pl-md-4">
-                    <div class="bill-box">
-                        <h5>Total Tagihan</h5>
-                        <h3>Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}</h3>
+                <!-- Bill Card -->
+                <div class="relative overflow-hidden bg-gradient-to-b from-zinc-900/50 to-zinc-950/50 border border-zinc-900 rounded-3xl p-6 shadow-xl shadow-red-950/5">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 text-center mb-4">Total Tagihan</h3>
+                    <div class="text-center py-4 border-y border-zinc-900/60">
+                        <span class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 via-rose-400 to-rose-500 bg-clip-text text-transparent">
+                            Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}
+                        </span>
                     </div>
-                    
-                    <h5 class="mt-4">Metode Pembayaran</h5>
-                    <div class="p-3 mb-3" style="background: #1a1a1a; border-radius: 8px; border-left: 3px solid #ff3b3b;">
-                        <p class="mb-1 small text-muted">Transfer Bank (Manual/Gateway):</p>
-                        <p class="mb-0 font-weight-bold">Bank XYZ: 123-456-7890</p>
-                        <p class="small">a.n. Cinema Ticketing</p>
+
+                    <div class="mt-6 space-y-4">
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Instruksi Pembayaran</h4>
+                        <div class="p-4 bg-zinc-950/60 border border-zinc-900 rounded-2xl flex flex-col gap-1">
+                            <span class="text-[10px] uppercase tracking-wider text-zinc-500">Transfer Bank Manual / Gateway</span>
+                            <span class="text-sm font-bold text-zinc-100 mt-1">Bank XYZ: 123-456-7890</span>
+                            <span class="text-xs text-zinc-400">a.n. Cinema Ticketing</span>
+                        </div>
                     </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <a href="{{ route('user.history') }}" class="btn btn-outline-gray">
-                            <i class="fas fa-arrow-left mr-1"></i> Riwayat
-                        </a>
-                        
-                        @if ($pemesanan->status === 'menunggu_pembayaran')
+
+                    @if ($pemesanan->status === 'menunggu_pembayaran')
+                        <div class="mt-8">
                             <form id="payment-form" action="{{ route('user.pemesanan.generatePayment', $pemesanan->kode_pemesanan) }}" method="POST">
                                 @csrf
-                                <button type="submit" class="btn btn-red" id="pay-button">
-                                    <i class="fas fa-credit-card mr-2"></i> BAYAR SEKARANG
+                                <button type="submit" id="pay-button" class="w-full text-center py-4 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-full transition-all duration-300 shadow-md shadow-red-950/40 active:scale-95 cursor-pointer">
+                                    <i class="fas fa-credit-card mr-2"></i> Bayar Sekarang
                                 </button> 
                             </form>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
+
             </div>
+
         </div>
     </div>
 </div>
@@ -223,6 +160,8 @@
                     countdownElement.innerHTML = "EXPIRED";
                     if(payButton) {
                         payButton.setAttribute('disabled', 'disabled');
+                        payButton.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-rose-600', 'hover:from-red-500', 'hover:to-rose-500', 'cursor-pointer');
+                        payButton.classList.add('bg-zinc-900', 'border', 'border-zinc-800', 'text-zinc-600', 'cursor-not-allowed');
                         payButton.innerHTML = "<i class='fas fa-lock mr-2'></i> WAKTU HABIS";
                     }
                     return; 
